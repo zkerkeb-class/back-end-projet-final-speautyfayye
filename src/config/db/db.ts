@@ -1,34 +1,22 @@
 import {DB_HOST, DB_NAME, DB_PWD, DB_USER, DB_PORT} from '../env';
-import {FileMigrationProvider, Kysely, Migrator, PostgresDialect} from 'kysely';
+import {FileMigrationProvider, Kysely, Migrator, PostgresDialect, Generated} from 'kysely';
 import {Pool} from 'pg';
 import {promises as fs} from 'node:fs';
 import * as path from 'node:path';
-
-// export interface UserTable {
-//   id: Generated<number>;
-//   email: string;
-//   password: string;
-//   phoneNumber: string;
-//   firstname: string;
-//   lastname: string;
-//   locale: Generated<string>;
-//   createdAt: Generated<Date>;
-//   updatedAt: Date | undefined;
-//   deletedAt: Date | undefined;
-// }
+import {IUser, IAlbum, IArtist, IArtistAlbum, IPlaylistTrack, ITrack} from '../../models/model';
 
 // export type UserWithPassword = Selectable<UserTable>;
 // export type NewUser = Insertable<UserTable>;
 // export type UserUpdate = Updateable<UserTable>;
 // export type IUser = Omit<UserWithPassword, 'password'>;
 
-interface IUser {
-  id: number;
-  name: string;
-}
-
 interface Database {
   user: IUser;
+  album: IAlbum;
+  artist: IArtist;
+  artist_album: IArtistAlbum;
+  playlist_track: IPlaylistTrack;
+  track: ITrack;
 }
 
 export const db = new Kysely<Database>({
