@@ -1,11 +1,9 @@
-import path from 'node:path';
-import UploadRepository, {IDirectory} from '../repositories/upload.repository';
 import {Readable} from 'node:stream';
 import {EAudioExtension} from '../models/enums/extension';
 import {EFileType} from '../models/enums/fileType';
-import {ReadStream} from 'node:fs';
-import ConvertService from './convert.service';
 import FileRepository from '../repositories/file.repository';
+import UploadRepository, {IDirectory} from '../repositories/upload.repository';
+import ConvertService from './convert.service';
 
 export default class AudioService {
   constructor(

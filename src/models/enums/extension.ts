@@ -7,6 +7,7 @@ export enum EImageExtension {
 
 export enum EAudioExtension {
   MP3 = 'mp3',
+  WAV = 'wav',
 }
 
 export type Extension = EImageExtension | EAudioExtension;
