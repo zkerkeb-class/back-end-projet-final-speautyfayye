@@ -28,6 +28,7 @@ import LogRepository from './repositories/log.repository';
 import swaggerUi from 'swagger-ui-express';
 import swaggerOutput from './swagger_output.json';
 import expressJSDocSwagger from 'express-jsdoc-swagger';
+import {migrateToLatest} from './config/db/db';
 
 const options = {
   definition: {
@@ -80,6 +81,8 @@ app.use(cookieParser());
 app.use(limiter.global);
 
 expressJSDocSwagger(app)(options);
+
+migrateToLatest();
 
 //#region Repositories
 const logRepository = new LogRepository();
