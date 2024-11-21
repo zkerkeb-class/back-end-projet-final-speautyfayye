@@ -1,6 +1,8 @@
 import sharp, {FormatEnum} from 'sharp';
 import {EImageExtension} from '../models/enums/extension';
-import {Readable} from 'node:stream';
+import {PassThrough, Readable} from 'node:stream';
+import ffmpeg from 'fluent-ffmpeg';
+import fs from 'node:fs';
 
 interface IConvertImageInput {
   buffer: Buffer;
@@ -39,12 +41,24 @@ export default class ConvertService {
     };
   }
 
-  // convertAudio(data: IConvertAudioInput) {
-  //   const outputStream = new PassThrough();
-  //   return ffmpeg()
-  //     .input(data.buffer.toString())
-  //     .inputFormat('mp3')
-  //     .toFormat('aac')
-  //     .pipe(outputStream);
-  // }
+  async convertBufferToWavStream(audioBuffer: Buffer): Promise<Readable> {
+    return new Promise<Readable>((resolve, reject) => {
+      const bufferStream = new Readable();
+      bufferStream.push(audioBuffer);
+      bufferStream.push(null);
+
+      const wavStream = new PassThrough();
+
+      ffmpeg(bufferStream)
+        .inputFormat('mp3')
+        .toFormat('wav')
+        .on('error', err => {
+          reject(err);
+        })
+        .on('end', () => {})
+        .pipe(wavStream);
+
+      resolve(wavStream);
+    });
+  }
 }

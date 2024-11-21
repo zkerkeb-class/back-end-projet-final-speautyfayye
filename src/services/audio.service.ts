@@ -1,36 +1,46 @@
 import path from 'node:path';
-import UploadRepository, {
-  IDirectory,
-} from '../repositories/upload.repository';
-import { Readable } from 'node:stream';
-import { EAudioExtension } from '../models/enums/extension';
-import { EFileType } from '../models/enums/fileType';
-import { ReadStream } from 'node:fs';
+import UploadRepository, {IDirectory} from '../repositories/upload.repository';
+import {Readable} from 'node:stream';
+import {EAudioExtension} from '../models/enums/extension';
+import {EFileType} from '../models/enums/fileType';
+import {ReadStream} from 'node:fs';
 import ConvertService from './convert.service';
 
 export default class AudioService {
   constructor(
     private readonly uploadRepository: UploadRepository,
-    private readonly convertService: ConvertService,
+    private readonly convertService: ConvertService
   ) {}
 
-  upload(audio: Express.Multer.File) {
+  async upload(audio: Express.Multer.File) {
     const directory: IDirectory = {
       name: path.parse(audio.originalname).name,
       subFolder: false,
       type: EFileType.AUDIO,
     };
 
-    // this.convertService.convertAudio({ buffer: audio.buffer });
-
-    this.uploadRepository.upload(
-      {
-        ...directory,
-        readable: Readable.from(audio.buffer),
-        extension: EAudioExtension.MP3,
-      },
-      this.uploadRepository.getDirPath(directory),
+    const wavStream = await this.convertService.convertBufferToWavStream(
+      audio.buffer
     );
+
+    await Promise.all([
+      this.uploadRepository.upload(
+        {
+          ...directory,
+          readable: Readable.from(audio.buffer),
+          extension: EAudioExtension.MP3,
+        },
+        this.uploadRepository.getDirPath(directory)
+      ),
+      this.uploadRepository.upload(
+        {
+          ...directory,
+          readable: wavStream,
+          extension: EAudioExtension.WAV,
+        },
+        this.uploadRepository.getDirPath(directory)
+      ),
+    ]);
   }
 
   read(name: string): ReadStream {
@@ -44,13 +54,13 @@ export default class AudioService {
         ...directory,
         extension: EAudioExtension.MP3,
       },
-      this.uploadRepository.getDirPath(directory),
+      this.uploadRepository.getDirPath(directory)
     );
   }
 
   readPartial(
     name: string,
-    range: string,
+    range: string
   ): {
     readable: Readable;
     chunkSize: number;
@@ -68,7 +78,7 @@ export default class AudioService {
         ...directory,
         extension: EAudioExtension.MP3,
       },
-      this.uploadRepository.getDirPath(directory),
+      this.uploadRepository.getDirPath(directory)
     );
 
     const parts = range.replace(/bytes=/, '').split('-');
@@ -84,7 +94,7 @@ export default class AudioService {
         },
         this.uploadRepository.getDirPath(directory),
         start,
-        end,
+        end
       ),
       chunkSize,
       start,
