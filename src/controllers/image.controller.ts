@@ -1,13 +1,13 @@
 import {Request, Response} from 'express';
-import {EStatusCode} from '../models/enums/statusCode';
-import ImageService from '../services/image.service';
-import {Error} from '../models/error';
-import {EImageExtension} from '../models/enums/extension';
 import {cache} from '../middleware/cache.middleware';
+import {EImageExtension} from '../models/enums/extension';
+import {EStatusCode} from '../models/enums/statusCode';
+import {Error} from '../models/error';
 import {ApiResponse} from '../models/other/apiResponse';
-import TrackRepository from '../repositories/track.repository';
 import AlbumRepository from '../repositories/album.repository';
 import ArtistRepository from '../repositories/artist.repository';
+import TrackRepository from '../repositories/track.repository';
+import ImageService from '../services/image.service';
 
 enum EEntityTypeId {
   track = 1,

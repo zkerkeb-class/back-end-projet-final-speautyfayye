@@ -1,8 +1,8 @@
-import { NextFunction, Request, Response } from 'express';
+import {NextFunction, Request, Response} from 'express';
 import NodeCache from 'node-cache';
-import { Stream } from 'stream';
+import {Stream} from 'stream';
 
-export const cache = new NodeCache({ stdTTL: 60 });
+export const cache = new NodeCache({stdTTL: 60});
 
 export default class CacheMiddleware {
   get = async (req: Request, res: Response, next: NextFunction) => {

@@ -55,7 +55,7 @@ export default class ImageService {
       type: EFileType.IMAGE,
       subFolder: true,
     };
-    return this.uploadRepository.read(
+    const result = this.uploadRepository.read(
       {
         ...directory,
         suffixes: [size],
@@ -63,5 +63,6 @@ export default class ImageService {
       },
       this.uploadRepository.getDirPath(directory)
     );
+    return result;
   }
 }

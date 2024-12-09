@@ -1,16 +1,12 @@
-import express, {Request, Router} from 'express';
-import ImageController from '../controllers/image.controller';
+import express, {Router} from 'express';
 import multer from 'multer';
-import path from 'node:path';
-import CacheMiddleware from '../middleware/cache.middleware';
+import ImageController from '../controllers/image.controller';
 import AuthMiddleware from '../middleware/auth.middleware';
-
-const allowedExtensions = ['.png', '.jpg', '.webp', '.jpeg'];
+import CacheMiddleware from '../middleware/cache.middleware';
 
 export default class ImageRouter {
   router: Router;
   multer = multer({
-    fileFilter: this.fileFilter,
     limits: {
       fileSize: 1024 * 1024,
     },
@@ -33,17 +29,5 @@ export default class ImageRouter {
     this.router
       .route('/:name/:size/:ext')
       .get(this.cacheMiddleware.get, this.imageController.get);
-  }
-
-  private fileFilter(
-    req: Request,
-    file: Express.Multer.File,
-    callback: multer.FileFilterCallback
-  ) {
-    var ext = path.extname(file.originalname);
-    if (!allowedExtensions.includes(ext)) {
-      return callback(new Error('Only images are allowed'));
-    }
-    callback(null, true);
   }
 }
