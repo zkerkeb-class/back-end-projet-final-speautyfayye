@@ -1,5 +1,5 @@
-import { EStatusCode } from '../models/enums/statusCode';
-import { Error } from '../models/error';
+import {EStatusCode} from '../models/enums/statusCode';
+import {Error} from '../models/error';
 
 export default class CorsMiddleware {
   allowedOrigins = ['http://example.com'];
@@ -8,7 +8,10 @@ export default class CorsMiddleware {
   constructor() {
     this.options = {
       origin: (origin: string | undefined, callback: Function) => {
-        if (!origin || this.allowedOrigins.includes(origin)) {
+        if (
+          !origin
+          // || this.allowedOrigins.includes(origin)
+        ) {
           callback(null, true);
         } else {
           throw new Error(EStatusCode.FORBIDDEN);

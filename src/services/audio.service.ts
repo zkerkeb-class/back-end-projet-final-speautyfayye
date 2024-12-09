@@ -19,9 +19,7 @@ export default class AudioService {
       type: EFileType.AUDIO,
     };
 
-    const wavStream = await this.convertService.convertBufferToWavStream(
-      audio.buffer
-    );
+    const wavStream = await this.convertService.convertToWav(audio.buffer);
 
     await Promise.all([
       this.uploadRepository.upload(

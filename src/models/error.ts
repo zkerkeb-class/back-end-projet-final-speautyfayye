@@ -1,12 +1,12 @@
-import { EStatusCode } from './enums/statusCode';
+import {EStatusCode} from './enums/statusCode';
 
 interface IErrorOptions {
-  message: string;
+  message: any;
 }
 
 export class Error {
   status: EStatusCode;
-  message?: string;
+  message?: any;
 
   constructor(status?: EStatusCode, options?: Partial<IErrorOptions>) {
     this.status = status ?? EStatusCode.INTERNAL_SERVER_ERROR;

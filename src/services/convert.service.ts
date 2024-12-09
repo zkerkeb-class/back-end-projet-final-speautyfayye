@@ -41,7 +41,7 @@ export default class ConvertService {
     };
   }
 
-  async convertBufferToWavStream(audioBuffer: Buffer): Promise<Readable> {
+  async convertToWav(audioBuffer: Buffer): Promise<Readable> {
     return new Promise<Readable>((resolve, reject) => {
       const bufferStream = new Readable();
       bufferStream.push(audioBuffer);
