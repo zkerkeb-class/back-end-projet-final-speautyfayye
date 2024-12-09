@@ -2,7 +2,7 @@ import {Kysely} from 'kysely';
 
 export async function up(db: Kysely<any>): Promise<void> {
   await db.schema
-    .createTable('users')
+    .createTable('user')
     .addColumn('id', 'serial', col => col.primaryKey())
     .addColumn('username', 'text', col => col.notNull())
     .addColumn('password', 'text', col => col.notNull())
@@ -10,65 +10,79 @@ export async function up(db: Kysely<any>): Promise<void> {
     .execute();
 
   await db.schema
-    .createTable('Artist')
+    .createTable('category')
     .addColumn('id', 'serial', col => col.primaryKey())
-    .addColumn('name', 'text', col => col.notNull())
-    .addColumn('genre', 'text', col => col.notNull())
-    .addColumn('bio', 'text')
+    .addColumn('name', 'text')
     .execute();
 
   await db.schema
-    .createTable('Album')
+    .createTable('artist')
+    .addColumn('id', 'serial', col => col.primaryKey())
+    .addColumn('name', 'text', col => col.notNull())
+    .addColumn('category_id', 'integer', col =>
+      col.references('category.id').onDelete('cascade')
+    )
+    .addColumn('bio', 'text')
+    .addColumn('picture', 'text')
+    .execute();
+
+  await db.schema
+    .createTable('album')
     .addColumn('id', 'serial', col => col.primaryKey())
     .addColumn('title', 'text')
     .addColumn('releaseDate', 'timestamp')
-    .addColumn('genre', 'text')
+    .addColumn('category_id', 'integer', col =>
+      col.references('category.id').onDelete('cascade')
+    )
+    .addColumn('picture', 'text')
     .execute();
 
   await db.schema
-    .createTable('Track')
+    .createTable('track')
     .addColumn('id', 'serial', col => col.primaryKey())
     .addColumn('title', 'text')
     .addColumn('duration', 'text')
     .addColumn('releaseDate', 'timestamp')
     .addColumn('tracKNumber', 'integer')
-    .addColumn('album_id', 'integer', col => 
-      col.references('Album.id').onDelete('cascade')
+    .addColumn('album_id', 'integer', col =>
+      col.references('album.id').onDelete('cascade')
     )
+    .addColumn('category_id', 'integer', col =>
+      col.references('category.id').onDelete('cascade')
+    )
+    .addColumn('picture', 'text')
     .execute();
 
   await db.schema
-    .createTable('Playlist')
+    .createTable('playlist')
     .addColumn('id', 'serial', col => col.primaryKey())
     .addColumn('title', 'text')
-    .addColumn('user_id', 'integer', col => 
-      col.references('users.id').onDelete('cascade').notNull()
+    .addColumn('user_id', 'integer', col =>
+      col.references('user.id').onDelete('cascade').notNull()
     )
     .execute();
 
   await db.schema
-    .createTable('Artist_Album')
-    .addColumn('artist_id', 'integer', col => 
-      col.references('Artist.id').onDelete('cascade')
+    .createTable('artist_album')
+    .addColumn('artist_id', 'integer', col =>
+      col.references('artist.id').onDelete('cascade')
     )
-    .addColumn('album_id', 'integer', col => 
-      col.references('Album.id').onDelete('cascade')
+    .addColumn('album_id', 'integer', col =>
+      col.references('album.id').onDelete('cascade')
     )
     .addPrimaryKeyConstraint('pk_artist_album', ['artist_id', 'album_id'])
     .execute();
-    
 
   await db.schema
-    .createTable('Playlist_Track')
-    .addColumn('playlist_id', 'integer', col => 
-      col.references('Playlist.id').onDelete('cascade')
+    .createTable('playlist_track')
+    .addColumn('playlist_id', 'integer', col =>
+      col.references('playlist.id').onDelete('cascade')
     )
-    .addColumn('track_id', 'integer', col => 
-      col.references('Track.id').onDelete('cascade')
+    .addColumn('track_id', 'integer', col =>
+      col.references('track.id').onDelete('cascade')
     )
     .addPrimaryKeyConstraint('pk_playlist_track', ['playlist_id', 'track_id'])
     .execute();
-
 }
 
 export async function down(db: Kysely<any>): Promise<void> {}

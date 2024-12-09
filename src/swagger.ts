@@ -27,6 +27,9 @@ const endpointsFiles = [
   './src/routers/image.router.ts',
   './src/routers/audio.router.ts',
   './src/routers/auth.router.ts',
+  './src/routers/user.router.ts',
+  './src/routers/playlist.router.ts',
+  './src/routers/track.router.ts',
 ];
 
 swaggerAutogen({openapi: '3.0.0'})(outputFile, endpointsFiles, doc);

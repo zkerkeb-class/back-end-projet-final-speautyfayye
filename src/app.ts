@@ -1,4 +1,4 @@
-import express, {Express, Request, Response} from 'express';
+import express, {Express} from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import RateLimiter from './config/rateLimit';
@@ -27,47 +27,13 @@ import LogRepository from './repositories/log.repository';
 
 import swaggerUi from 'swagger-ui-express';
 import swaggerOutput from './swagger_output.json';
-import expressJSDocSwagger from 'express-jsdoc-swagger';
 import {migrateToLatest} from './config/db/db';
-
-const options = {
-  definition: {
-    openapi: '3.0.0',
-  },
-  info: {
-    version: '1.0.0',
-    title: 'Albums store',
-    license: {
-      name: 'MIT',
-    },
-  },
-  security: {
-    BasicAuth: {
-      type: 'http',
-      scheme: 'basic',
-    },
-  },
-  // Base directory which we use to locate your JSDOC files
-  baseDir: __dirname,
-  // Glob pattern to find your jsdoc files (multiple patterns can be added in an array)
-  filesPattern: './routers/*.ts',
-  // URL where SwaggerUI will be rendered
-  swaggerUIPath: '/swagger',
-  // Expose OpenAPI UI
-  exposeSwaggerUI: true,
-  // Expose Open API JSON Docs documentation in `apiDocsPath` path.
-  exposeApiDocs: false,
-  // Open API JSON Docs endpoint.
-  apiDocsPath: '/v3/api-docs',
-  // Set non-required fields as nullable by default
-  notRequiredAsNullable: false,
-  // You can customize your UI options.
-  // you can extend swagger-ui-express config. You can checkout an example of this
-  // in the `example/configuration/swaggerOptions.js`
-  swaggerUiOptions: {},
-  // multiple option in case you want more that one instance
-  multiple: true,
-};
+import UserRouter from './routers/user.router';
+import UserController from './controllers/user.controller';
+import PlaylistController from './controllers/playlist.controller';
+import PlaylistRouter from './routers/playlist.router';
+import TrackRouter from './routers/track.router';
+import TrackController from './controllers/track.controller';
 
 const limiter = new RateLimiter();
 const corsMiddleware = new CorsMiddleware();
@@ -79,8 +45,6 @@ app.use(compression());
 app.use(express.json({limit: '10kb'}));
 app.use(cookieParser());
 app.use(limiter.global);
-
-expressJSDocSwagger(app)(options);
 
 migrateToLatest();
 
@@ -106,6 +70,9 @@ const authController = new AuthController(authService);
 const fileController = new ImageController(uploadService);
 const audioController = new AudioController(audioService);
 const errorController = new ErrorController(logRepository);
+const userController = new UserController();
+const playlistController = new PlaylistController();
+const trackController = new TrackController();
 //#endregion
 
 //#region Routers
@@ -116,6 +83,9 @@ const fileRouter = new ImageRouter(
   cacheMiddleware
 );
 const audioRouter = new AudioRouter(audioController);
+const userRouter = new UserRouter(userController);
+const playlistRouter = new PlaylistRouter(playlistController);
+const trackRouter = new TrackRouter(trackController);
 //#endregion
 
 //#region Endpoints
@@ -123,6 +93,9 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerOutput));
 app.use('/auth', authRouter.router);
 app.use('/file', fileRouter.router);
 app.use('/audio', audioRouter.router);
+app.use('/user', userRouter.router);
+app.use('/playlist', playlistRouter.router);
+app.use('/track', trackRouter.router);
 app.use(errorController.errorHandler);
 //#endregion
 

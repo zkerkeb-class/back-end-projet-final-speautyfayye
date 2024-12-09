@@ -1,22 +1,24 @@
 import {DB_HOST, DB_NAME, DB_PWD, DB_USER, DB_PORT} from '../env';
-import {FileMigrationProvider, Kysely, Migrator, PostgresDialect, Generated} from 'kysely';
+import {FileMigrationProvider, Kysely, Migrator, PostgresDialect} from 'kysely';
 import {Pool} from 'pg';
 import {promises as fs} from 'node:fs';
 import * as path from 'node:path';
-import {IUser, IAlbum, IArtist, IArtistAlbum, IPlaylistTrack, ITrack} from '../../models/model';
-
-// export type UserWithPassword = Selectable<UserTable>;
-// export type NewUser = Insertable<UserTable>;
-// export type UserUpdate = Updateable<UserTable>;
-// export type IUser = Omit<UserWithPassword, 'password'>;
+import {UserTable} from '../../models/user';
+import {AlbumTable} from '../../models/album';
+import {ArtistTable} from '../../models/artist';
+import {ArtistAlbumTable} from '../../models/artist_album';
+import {PlaylistTrackTable} from '../../models/playlist_track';
+import {TrackTable} from '../../models/track';
+import {PlaylistTable} from '../../models/playlist';
 
 interface Database {
-  user: IUser;
-  album: IAlbum;
-  artist: IArtist;
-  artist_album: IArtistAlbum;
-  playlist_track: IPlaylistTrack;
-  track: ITrack;
+  user: UserTable;
+  album: AlbumTable;
+  artist: ArtistTable;
+  artist_album: ArtistAlbumTable;
+  playlist_track: PlaylistTrackTable;
+  track: TrackTable;
+  playlist: PlaylistTable;
 }
 
 export const db = new Kysely<Database>({

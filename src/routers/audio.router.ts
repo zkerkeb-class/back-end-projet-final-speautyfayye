@@ -1,4 +1,4 @@
-import express, { Request, Router } from 'express';
+import express, {Request, Router} from 'express';
 import multer from 'multer';
 import path from 'node:path';
 import AudioController from '../controllers/audio.controller';
@@ -30,11 +30,11 @@ export default class AudioRouter {
   private fileFilter(
     req: Request,
     file: Express.Multer.File,
-    callback: multer.FileFilterCallback,
+    callback: multer.FileFilterCallback
   ) {
     var ext = path.extname(file.originalname);
     if (!allowedExtensions.includes(ext)) {
-      return callback(new Error('Only images are allowed'));
+      return callback(new Error('Only mp3 are allowed'));
     }
     callback(null, true);
   }
