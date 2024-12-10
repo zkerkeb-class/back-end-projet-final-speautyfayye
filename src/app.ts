@@ -10,6 +10,7 @@ import UploadRepository from './repositories/upload.repository';
 import ConvertService from './services/convert.service';
 import ImageService from './services/image.service';
 import AudioService from './services/audio.service';
+import ArtistService from './services/artist.service';
 
 import ImageController from './controllers/image.controller';
 import ErrorController from './controllers/error.controller';
@@ -42,6 +43,8 @@ import CategoryRepository from './repositories/category.repository';
 import CategoryController from './controllers/category.controller';
 import CategoryRouter from './routers/category.router';
 import FileRepository from './repositories/file.repository';
+import ArtistRouter from './routers/artist.router';
+import ArtistController from './controllers/artist.controller';
 
 const limiter = new RateLimiter();
 const corsMiddleware = new CorsMiddleware();
@@ -78,6 +81,8 @@ const audioService = new AudioService(
   fileRepository,
   convertService
 );
+const artistService = new ArtistService();
+
 //#endregion
 
 //#region Middlewares
@@ -95,6 +100,7 @@ const playlistController = new PlaylistController();
 const trackController = new TrackController(trackRepository);
 const albumController = new AlbumController(albumRepository);
 const categoryController = new CategoryController(categoryRepository);
+const artistController = new ArtistController(artistService);
 //#endregion
 
 //#region Routers
@@ -110,6 +116,7 @@ const playlistRouter = new PlaylistRouter(playlistController);
 const trackRouter = new TrackRouter(trackController);
 const albumRouter = new AlbumRouter(albumController);
 const categoryRouter = new CategoryRouter(categoryController);
+const artistRouter = new ArtistRouter(artistController);
 //#endregion
 
 //#region Endpoints
@@ -122,6 +129,7 @@ app.use('/playlist', playlistRouter.router);
 app.use('/track', trackRouter.router);
 app.use('/album', albumRouter.router);
 app.use('/category', categoryRouter.router);
+app.use('/artist', artistRouter.router);
 app.use(errorController.errorHandler);
 //#endregion
 
