@@ -1,7 +1,7 @@
-import { JwtPayload, sign, verify } from 'jsonwebtoken';
-import { EStatusCode } from '../models/enums/statusCode';
-import { Error } from '../models/error';
-import { Request } from 'express';
+import {JwtPayload, sign, verify} from 'jsonwebtoken';
+import {EStatusCode} from '../models/enums/statusCode';
+import {Error} from '../models/error';
+import {Request} from 'express';
 
 const accessSecret = 'def';
 const refreshSecret = 'deffe';
@@ -9,7 +9,7 @@ const refreshSecret = 'deffe';
 export default class AuthService {
   generateAccessToken(userId: number) {
     try {
-      return sign({ _id: userId }, accessSecret, { expiresIn: '5m' });
+      return sign({_id: userId}, accessSecret, {expiresIn: '5m'});
     } catch (error) {
       throw new Error(EStatusCode.INTERNAL_SERVER_ERROR);
     }
@@ -17,14 +17,14 @@ export default class AuthService {
 
   generateRefreshToken(userId: number) {
     try {
-      return sign({ _id: userId }, refreshSecret, { expiresIn: '7d' });
+      return sign({_id: userId}, refreshSecret, {expiresIn: '7d'});
     } catch (error) {
       throw new Error(EStatusCode.INTERNAL_SERVER_ERROR);
     }
   }
 
   async verifyAccessToken(
-    token: string,
+    token: string
   ): Promise<string | JwtPayload | undefined> {
     try {
       return verify(token, accessSecret);

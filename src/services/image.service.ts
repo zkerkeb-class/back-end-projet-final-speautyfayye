@@ -1,48 +1,54 @@
 import path from 'node:path';
-import { EImageExtension, Extension } from '../models/enums/extension';
-import { EFileType } from '../models/enums/fileType';
-import UploadRepository, {
-  IDirectory,
-} from '../repositories/upload.repository';
-import ConvertService, { IConvertImageOutput } from './convert.service';
-import { ReadStream } from 'node:fs';
+import {EImageExtension, Extension} from '../models/enums/extension';
+import {EFileType} from '../models/enums/fileType';
+import UploadRepository, {IDirectory} from '../repositories/upload.repository';
+import ConvertService, {IConvertImageOutput} from './convert.service';
+import {ReadStream} from 'node:fs';
+import FileRepository from '../repositories/file.repository';
+import {EEntityType} from '../models/enums/entityType';
 
 export default class ImageService {
   private readonly sizes = [200, 400, 800];
 
   constructor(
     private readonly uploadRepository: UploadRepository,
-    private readonly convertService: ConvertService,
+    private readonly fileRepository: FileRepository,
+    private readonly convertService: ConvertService
   ) {}
 
   upload = async (image: Express.Multer.File) => {
-    const convertedImages: IConvertImageOutput[][] = this.sizes.map((size) =>
+    const uuid = crypto.randomUUID();
+    const convertedImages: IConvertImageOutput[][] = this.sizes.map(size =>
       Object.values(EImageExtension).map((key: string) =>
         this.convertService.convertImage({
           buffer: image.buffer,
           size,
           to: key as EImageExtension,
-        }),
-      ),
+        })
+      )
     );
 
-    const name = path.parse(image.originalname).name;
     const directory: IDirectory = {
-      name,
+      name: uuid,
       type: EFileType.IMAGE,
       subFolder: true,
     };
     await this.uploadRepository.uploadMultiple(
-      convertedImages.flatMap((convertedSizedImages) =>
-        convertedSizedImages.map((extension) => ({
+      convertedImages.flatMap(convertedSizedImages =>
+        convertedSizedImages.map(extension => ({
           ...directory,
           suffixes: [extension.size.toString()],
           extension: extension.extension,
           readable: extension.image,
-        })),
+        }))
       ),
-      this.uploadRepository.getDirPath(directory),
+      this.uploadRepository.getDirPath(directory)
     );
+    await this.fileRepository.insert({
+      id: uuid,
+      fileType: EFileType.IMAGE,
+    });
+    return uuid;
   };
 
   read(name: string, size: string, extension: Extension): ReadStream {
@@ -57,7 +63,7 @@ export default class ImageService {
         suffixes: [size],
         extension,
       },
-      this.uploadRepository.getDirPath(directory),
+      this.uploadRepository.getDirPath(directory)
     );
   }
 }

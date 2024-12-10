@@ -34,6 +34,14 @@ import PlaylistController from './controllers/playlist.controller';
 import PlaylistRouter from './routers/playlist.router';
 import TrackRouter from './routers/track.router';
 import TrackController from './controllers/track.controller';
+import TrackRepository from './repositories/track.repository';
+import AlbumRouter from './routers/album.router';
+import AlbumController from './controllers/album.controller';
+import AlbumRepository from './repositories/album.repository';
+import CategoryRepository from './repositories/category.repository';
+import CategoryController from './controllers/category.controller';
+import CategoryRouter from './routers/category.router';
+import FileRepository from './repositories/file.repository';
 
 const limiter = new RateLimiter();
 const corsMiddleware = new CorsMiddleware();
@@ -50,14 +58,26 @@ migrateToLatest();
 
 //#region Repositories
 const logRepository = new LogRepository();
+const fileRepository = new FileRepository();
 const uploadRepository = new UploadRepository(logRepository);
+const trackRepository = new TrackRepository();
+const albumRepository = new AlbumRepository();
+const categoryRepository = new CategoryRepository();
 //#endregion
 
 //#region Services
 const authService = new AuthService();
 const convertService = new ConvertService();
-const uploadService = new ImageService(uploadRepository, convertService);
-const audioService = new AudioService(uploadRepository, convertService);
+const uploadService = new ImageService(
+  uploadRepository,
+  fileRepository,
+  convertService
+);
+const audioService = new AudioService(
+  uploadRepository,
+  fileRepository,
+  convertService
+);
 //#endregion
 
 //#region Middlewares
@@ -72,7 +92,9 @@ const audioController = new AudioController(audioService);
 const errorController = new ErrorController(logRepository);
 const userController = new UserController();
 const playlistController = new PlaylistController();
-const trackController = new TrackController();
+const trackController = new TrackController(trackRepository);
+const albumController = new AlbumController(albumRepository);
+const categoryController = new CategoryController(categoryRepository);
 //#endregion
 
 //#region Routers
@@ -86,6 +108,8 @@ const audioRouter = new AudioRouter(audioController);
 const userRouter = new UserRouter(userController);
 const playlistRouter = new PlaylistRouter(playlistController);
 const trackRouter = new TrackRouter(trackController);
+const albumRouter = new AlbumRouter(albumController);
+const categoryRouter = new CategoryRouter(categoryController);
 //#endregion
 
 //#region Endpoints
@@ -96,6 +120,8 @@ app.use('/audio', audioRouter.router);
 app.use('/user', userRouter.router);
 app.use('/playlist', playlistRouter.router);
 app.use('/track', trackRouter.router);
+app.use('/album', albumRouter.router);
+app.use('/category', categoryRouter.router);
 app.use(errorController.errorHandler);
 //#endregion
 

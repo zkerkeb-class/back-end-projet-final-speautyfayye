@@ -1,10 +1,10 @@
-import fs, { ReadStream } from 'node:fs';
-import { Readable } from 'node:stream';
+import fs, {ReadStream} from 'node:fs';
+import {Readable} from 'node:stream';
 import path from 'node:path';
-import { Extension } from '../models/enums/extension';
-import { EFileType } from '../models/enums/fileType';
+import {Extension} from '../models/enums/extension';
+import {EFileType} from '../models/enums/fileType';
 import LogRepository from './log.repository';
-import { EStatusCode } from '../models/enums/statusCode';
+import {EStatusCode} from '../models/enums/statusCode';
 
 export interface IDirectory {
   name: string;
@@ -27,33 +27,33 @@ export default class UploadRepository {
   constructor(private readonly logRepository: LogRepository) {}
 
   async upload(file: IUpload, directoryPath: string) {
-    fs.mkdirSync(directoryPath, { recursive: true });
+    fs.mkdirSync(directoryPath, {recursive: true});
 
     file.suffixes?.unshift(file.name);
     const filename = (file.suffixes?.join('-') ?? file.name).concat(
       '.',
-      file.extension,
+      file.extension
     );
     const writableStream = fs.createWriteStream(
-      `${path.join(directoryPath, filename)}`,
+      `${path.join(directoryPath, filename)}`
     );
     file.readable.pipe(writableStream);
     await new Promise<void>((resolve, reject) => {
       writableStream.on('finish', () => resolve());
-      writableStream.on('error', (error) => reject(error));
+      writableStream.on('error', error => reject(error));
     });
     this.logRepository.insert(EStatusCode.CREATED, `inserted ${filename}`);
   }
 
   async uploadMultiple(data: IUpload[], directoryPath: string) {
-    await Promise.all(data.map((d) => this.upload(d, directoryPath)));
+    await Promise.all(data.map(d => this.upload(d, directoryPath)));
   }
 
   read(file: IFile, directoryPath: string): ReadStream {
     file.suffixes?.unshift(file.name);
     const filename = (file.suffixes?.join('-') ?? file.name).concat(
       '.',
-      file.extension,
+      file.extension
     );
     return fs.createReadStream(`${path.join(directoryPath, filename)}`);
   }
@@ -62,7 +62,7 @@ export default class UploadRepository {
     file: IFile,
     directoryPath: string,
     start: number,
-    end: number,
+    end: number
   ): Readable {
     const filename = file.suffixes?.join('-') ?? file.name;
     return fs.createReadStream(`${path.join(directoryPath, filename)}`, {
@@ -80,7 +80,7 @@ export default class UploadRepository {
     return path.join(
       this.directoryPath,
       directory.type,
-      directory.subFolder ? directory.name : '',
+      directory.subFolder ? directory.name : ''
     );
   }
 }

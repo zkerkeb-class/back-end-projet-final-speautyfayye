@@ -2,6 +2,14 @@ import {Kysely} from 'kysely';
 
 export async function up(db: Kysely<any>): Promise<void> {
   await db.schema
+    .createTable('file')
+    .addColumn('id', 'text')
+    .addColumn('fileType', 'text', col => col.notNull())
+    .addColumn('entityId', 'integer')
+    .addColumn('entityTypeId', 'text')
+    .execute();
+
+  await db.schema
     .createTable('user')
     .addColumn('id', 'serial', col => col.primaryKey())
     .addColumn('username', 'text', col => col.notNull())
@@ -43,7 +51,7 @@ export async function up(db: Kysely<any>): Promise<void> {
     .addColumn('title', 'text')
     .addColumn('duration', 'text')
     .addColumn('releaseDate', 'timestamp')
-    .addColumn('tracKNumber', 'integer')
+    .addColumn('trackNumber', 'integer')
     .addColumn('album_id', 'integer', col =>
       col.references('album.id').onDelete('cascade')
     )
@@ -51,6 +59,7 @@ export async function up(db: Kysely<any>): Promise<void> {
       col.references('category.id').onDelete('cascade')
     )
     .addColumn('picture', 'text')
+    .addColumn('audio', 'text', col => col.notNull())
     .execute();
 
   await db.schema

@@ -10,6 +10,8 @@ import {ArtistAlbumTable} from '../../models/artist_album';
 import {PlaylistTrackTable} from '../../models/playlist_track';
 import {TrackTable} from '../../models/track';
 import {PlaylistTable} from '../../models/playlist';
+import {CategoryTable} from '../../models/category';
+import {FileTable} from '../../models/file';
 
 interface Database {
   user: UserTable;
@@ -19,6 +21,8 @@ interface Database {
   playlist_track: PlaylistTrackTable;
   track: TrackTable;
   playlist: PlaylistTable;
+  category: CategoryTable;
+  file: FileTable;
 }
 
 export const db = new Kysely<Database>({

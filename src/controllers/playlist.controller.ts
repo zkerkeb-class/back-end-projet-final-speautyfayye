@@ -24,6 +24,7 @@ export default class PlaylistController {
           trackNumber: 1,
           category_id: 1,
           picture: undefined,
+          audio: '',
         },
         {
           id: 2,
@@ -34,6 +35,7 @@ export default class PlaylistController {
           trackNumber: 2,
           category_id: 2,
           picture: undefined,
+          audio: '',
         },
         {
           id: 3,
@@ -44,6 +46,7 @@ export default class PlaylistController {
           trackNumber: 3,
           category_id: 1,
           picture: undefined,
+          audio: '',
         },
       ],
     };

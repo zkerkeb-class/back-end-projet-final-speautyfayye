@@ -1,7 +1,7 @@
-import { NextFunction, Request, Response } from 'express';
+import {NextFunction, Request, Response} from 'express';
 import AuthService from '../services/auth.service';
-import { EStatusCode } from '../models/enums/statusCode';
-import { Error } from '../models/error';
+import {EStatusCode} from '../models/enums/statusCode';
+import {Error} from '../models/error';
 
 export default class AuthMiddleware {
   constructor(private readonly authService: AuthService) {}
@@ -9,7 +9,7 @@ export default class AuthMiddleware {
   isLogged = async (
     req: Request,
     res: Response,
-    next: NextFunction,
+    next: NextFunction
   ): Promise<void> => {
     const accessToken = this.authService.getAccessToken(req);
     if (!accessToken) {
@@ -22,7 +22,7 @@ export default class AuthMiddleware {
   isAnonymous = async (
     req: Request,
     res: Response,
-    next: NextFunction,
+    next: NextFunction
   ): Promise<void> => {
     const accessToken = this.authService.getAccessToken(req);
     if (accessToken) {
