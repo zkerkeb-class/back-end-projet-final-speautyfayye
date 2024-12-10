@@ -5,7 +5,7 @@ import {IAlbum} from './album';
 export interface TrackTable {
   id: Generated<number>;
   title: string;
-  duration: string;
+  duration: number | undefined;
   releaseDate: Date;
   trackNumber: number;
   album_id: number;
@@ -21,7 +21,7 @@ export type TrackUpdate = Updateable<TrackTable>;
 export class Track implements ITrack {
   id: number;
   title: string;
-  duration: string;
+  duration: number | undefined;
   releaseDate: Date;
   trackNumber: number;
   album_id: number;

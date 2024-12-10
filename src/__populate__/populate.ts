@@ -12,6 +12,10 @@ import {Pool} from 'pg';
 import {DB_HOST, DB_NAME, DB_PORT, DB_PWD, DB_USER} from '../config/env';
 import fs from 'node:fs';
 import {faker} from '@faker-js/faker';
+import {randomUUID} from 'node:crypto';
+import path from 'node:path';
+import {EFileType} from '../models/enums/fileType';
+import {EEntityType} from '../models/enums/entityType';
 const m = import('music-metadata');
 
 interface Database {
@@ -27,13 +31,18 @@ interface Database {
 }
 
 interface IAudioMetadata {
-  artists?: string[];
-  artist?: string;
-  title?: string;
-  album?: string;
-  genre?: string[];
-  year?: number;
-  date?: string;
+  common?: {
+    artists?: string[];
+    artist?: string;
+    title?: string;
+    album?: string;
+    genre?: string[];
+    year?: number;
+    date?: string;
+  };
+  format?: {
+    duration?: number;
+  };
 }
 
 const populate = async () => {
@@ -49,30 +58,222 @@ const populate = async () => {
     }),
   });
 
-  const artists = new Set<string>();
-
-  const categories = new Set<string>();
+  const categories: {id?: number; name: string}[] = [];
+  const artists: {id?: number; name: string}[] = [];
+  const albums: {id?: number; artist_id: number; name: string}[] = [];
+  const tracks: {
+    id?: number;
+    artist_id: number;
+    name: string;
+    album_id: number;
+  }[] = [];
 
   const directory = `${__dirname}/audios/`;
+
+  let count = 0;
   fs.readdir(directory, async (err, files) => {
+    if (err) {
+      console.error('Erreur lors de la lecture du répertoire:', err);
+      return;
+    }
+    if (files.some(file => !file.endsWith('.mp3'))) {
+      console.error('Fichier mp3 seulement');
+      return;
+    }
+
     const parseFile = (await m).parseFile;
 
-    files.forEach(async file => {
-      const metadata = fs.statSync(directory + file);
-      const songName = file.split('.')[0]; // retire le .mp3
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
 
-      const {common}: {common: IAudioMetadata} = await parseFile(
+      const {common, format}: IAudioMetadata = await parseFile(
         directory + file
       );
+      console.log('🚀 ~ fs.readdir ~ format:', format);
+      if (!common.date) {
+        common.date = `${common.year ?? new Date().getFullYear()}0101`; // format YYYYMMDD
+      }
+      const year = parseInt(common.date.substring(0, 4), 10);
+      const month = parseInt(common.date.substring(4, 6), 10) - 1;
+      const day = parseInt(common.date.substring(6, 8), 10);
+      const releaseDate = new Date(year, month, day);
 
-      categories.add(common.genre?.at(0) ?? faker.music.genre());
+      const categoryName = common.genre?.at(0) ?? faker.music.genre();
+      let category_id = await createCategory(db, categories, categoryName);
 
-      console.log('🚀 ~ fs.readdir ~ categories:', categories);
-      // artists.add(common.artist ?? common.artists?.[0] ?? faker.music.artist());
+      const artistName =
+        common.artist ?? common.artists?.at(0) ?? faker.music.genre();
+      let artist_id = await createArtist(db, artists, artistName, category_id);
 
-      await db.transaction().execute(async trx => {});
-    });
+      common.artists?.forEach(
+        async artist => await createArtist(db, artists, artist, category_id)
+      );
+
+      const albumName = common.album ?? faker.music.album();
+      let album_id = await createAlbum(
+        db,
+        albums,
+        albumName,
+        artist_id,
+        category_id,
+        releaseDate
+      );
+
+      const trackName = common.title ?? faker.music.songName();
+      const audioId = randomUUID();
+      await createTrack(
+        db,
+        tracks,
+        trackName,
+        artist_id,
+        category_id,
+        album_id,
+        releaseDate,
+        1,
+        audioId,
+        format.duration
+      );
+
+      const buffer = await fs.promises.readFile(directory + file);
+      fs.writeFileSync(
+        path.join(directory, '../../../ressources/audios/', audioId + '.mp3'),
+        buffer
+      );
+      fs.unlinkSync(path.join(directory, file));
+
+      count++;
+    }
+    console.log('files processed:', count);
   });
 };
 
 populate();
+
+const createCategory = async (
+  db: Kysely<Database>,
+  categories: {id?: number; name: string}[],
+  name: string
+) => {
+  if (categories.some(category => category.name === name)) {
+    return (
+      Array.from(categories).find(category => category.name === name)?.id ?? 0
+    );
+  } else {
+    const dbCategory = await db
+      .insertInto('category')
+      .values({name: name})
+      .returningAll()
+      .executeTakeFirstOrThrow();
+    categories.push({name: name, id: dbCategory.id});
+    return dbCategory.id;
+  }
+};
+
+const createArtist = async (
+  db: Kysely<Database>,
+  artists: {id?: number; name: string}[],
+  name: string,
+  category_id: number
+) => {
+  if (artists.some(artist => artist.name === name)) {
+    return Array.from(artists).find(artist => artist.name === name)?.id ?? 0;
+  } else {
+    const dbArtist = await db
+      .insertInto('artist')
+      .values({name: name, bio: faker.lorem.sentences(), category_id})
+      .returningAll()
+      .executeTakeFirstOrThrow();
+    artists.push({name: name, id: dbArtist.id});
+    return dbArtist.id;
+  }
+};
+
+const createAlbum = async (
+  db: Kysely<Database>,
+  albums: {id?: number; artist_id: number; name: string}[],
+  name: string,
+  artist_id: number,
+  category_id: number,
+  releaseDate: Date
+) => {
+  if (
+    albums.some(album => album.name === name && album.artist_id === artist_id)
+  ) {
+    return (
+      Array.from(albums).find(
+        album => album.name === name && album.artist_id === artist_id
+      )?.id ?? 0
+    );
+  } else {
+    const dbAlbum = await db
+      .insertInto('album')
+      .values({title: name, category_id, releaseDate})
+      .returningAll()
+      .executeTakeFirstOrThrow();
+    albums.push({name: name, id: dbAlbum.id, artist_id});
+
+    await db
+      .insertInto('artist_album')
+      .values({album_id: dbAlbum.id, artist_id})
+      .execute();
+
+    return dbAlbum.id;
+  }
+};
+
+const createTrack = async (
+  db: Kysely<Database>,
+  tracks: {id?: number; artist_id: number; name: string; album_id: number}[],
+  name: string,
+  artist_id: number,
+  category_id: number,
+  album_id: number,
+  releaseDate: Date,
+  trackNumber: number,
+  audio: string,
+  duration?: number
+) => {
+  if (
+    tracks.some(
+      track =>
+        track.name === name &&
+        track.artist_id === artist_id &&
+        track.album_id === album_id
+    )
+  ) {
+    return (
+      Array.from(tracks).find(
+        track =>
+          track.name === name &&
+          track.artist_id === artist_id &&
+          track.album_id === album_id
+      )?.id ?? 0
+    );
+  } else {
+    const dbTrack = await db
+      .insertInto('track')
+      .values({
+        title: name,
+        category_id,
+        releaseDate,
+        album_id,
+        audio,
+        duration,
+        trackNumber,
+      })
+      .returningAll()
+      .executeTakeFirstOrThrow();
+    tracks.push({name: name, id: dbTrack.id, artist_id, album_id});
+
+    await db
+      .insertInto('file')
+      .values({
+        fileType: EFileType.AUDIO,
+        id: audio,
+        entityId: dbTrack.id,
+        entityTypeId: EEntityType.TRACK,
+      })
+      .execute();
+    return dbTrack.id;
+  }
+};

@@ -23,4 +23,15 @@ log.txt
 notifications/
 .env*
 .vscode
-ressources/*
+
+ressources/audios/*
+!ressources/audios/.gitkeep
+
+ressources/images/*
+!ressources/images/.gitkeep
+
+ressources/logs/*
+!ressources/logs/.gitkeep
+
+/src/__populate__/audios/*
+!/src/__populate__/audios/.gitkeep

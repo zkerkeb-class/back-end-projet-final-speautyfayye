@@ -49,7 +49,7 @@ export async function up(db: Kysely<any>): Promise<void> {
     .createTable('track')
     .addColumn('id', 'serial', col => col.primaryKey())
     .addColumn('title', 'text')
-    .addColumn('duration', 'text')
+    .addColumn('duration', 'decimal')
     .addColumn('releaseDate', 'timestamp')
     .addColumn('trackNumber', 'integer')
     .addColumn('album_id', 'integer', col =>
