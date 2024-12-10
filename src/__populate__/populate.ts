@@ -11,6 +11,8 @@ import {UserTable} from '../models/user';
 import {Pool} from 'pg';
 import {DB_HOST, DB_NAME, DB_PORT, DB_PWD, DB_USER} from '../config/env';
 import fs from 'node:fs';
+import {faker} from '@faker-js/faker';
+const m = import('music-metadata');
 
 interface Database {
   user: UserTable;
@@ -22,6 +24,16 @@ interface Database {
   playlist: PlaylistTable;
   category: CategoryTable;
   file: FileTable;
+}
+
+interface IAudioMetadata {
+  artists?: string[];
+  artist?: string;
+  title?: string;
+  album?: string;
+  genre?: string[];
+  year?: number;
+  date?: string;
 }
 
 const populate = async () => {
@@ -37,14 +49,26 @@ const populate = async () => {
     }),
   });
 
+  const artists = new Set<string>();
+
+  const categories = new Set<string>();
+
   const directory = `${__dirname}/audios/`;
   fs.readdir(directory, async (err, files) => {
+    const parseFile = (await m).parseFile;
+
     files.forEach(async file => {
       const metadata = fs.statSync(directory + file);
       const songName = file.split('.')[0]; // retire le .mp3
 
-      console.log('🚀 ~ fs.readdir ~ songName:', songName);
-      console.log('🚀 ~ fs.readdir ~ metadata:', metadata);
+      const {common}: {common: IAudioMetadata} = await parseFile(
+        directory + file
+      );
+
+      categories.add(common.genre?.at(0) ?? faker.music.genre());
+
+      console.log('🚀 ~ fs.readdir ~ categories:', categories);
+      // artists.add(common.artist ?? common.artists?.[0] ?? faker.music.artist());
 
       await db.transaction().execute(async trx => {});
     });

@@ -22,6 +22,7 @@ export default class PlaylistController {
 
   create = async (req: Request, res: Response) => {
     // todo validations
+    console.log('🚀 ~ PlaylistController ~ create= ~ req.body:', req.body);
     const playlist = await this.playlistRepository.create(
       req.body as NewPlaylist
     );

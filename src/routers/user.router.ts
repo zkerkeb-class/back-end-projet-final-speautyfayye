@@ -22,6 +22,6 @@ export default class UserRouter {
   }
 
   private createRoutes() {
-    this.router.route('/playlists').get(this.userController.getPlaylists);
+    this.router.route('/playlists/:id').get(this.userController.getPlaylists);
   }
 }

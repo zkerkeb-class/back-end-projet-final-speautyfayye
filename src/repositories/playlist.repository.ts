@@ -4,6 +4,7 @@ import {IPlaylist, IPlaylistExt, NewPlaylist} from '../models/playlist';
 
 export default class PlaylistRepository {
   create = async (playlist: NewPlaylist): Promise<IPlaylist> => {
+    console.log('🚀 ~ PlaylistRepository ~ create= ~ playlist:', playlist);
     return await db
       .insertInto('playlist')
       .values(playlist)
@@ -26,5 +27,13 @@ export default class PlaylistRepository {
         ).as('tracks'),
       ])
       .executeTakeFirst();
+  };
+
+  getByUserId = async (userId: number): Promise<IPlaylist[]> => {
+    return db
+      .selectFrom('playlist')
+      .selectAll()
+      .where('playlist.user_id', '=', userId)
+      .execute();
   };
 }
