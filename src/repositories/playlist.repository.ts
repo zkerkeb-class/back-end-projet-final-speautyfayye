@@ -21,9 +21,10 @@ export default class PlaylistRepository {
         jsonArrayFrom(
           eb
             .selectFrom('track')
+            .innerJoin('playlist_track', 'track.id', 'playlist_track.track_id')
+            .where('playlist_track.playlist_id', '=', id)
             .selectAll('track')
-            // .limit(20)
-            .where('track.album_id', '=', id)
+            .limit(20)
         ).as('tracks'),
       ])
       .executeTakeFirst();
