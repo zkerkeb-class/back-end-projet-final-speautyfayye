@@ -12,7 +12,7 @@ import {Pool} from 'pg';
 import {DB_HOST, DB_NAME, DB_PORT, DB_PWD, DB_USER} from '../config/env';
 import fs from 'node:fs';
 import {faker} from '@faker-js/faker';
-import {randomUUID} from 'node:crypto';
+import {randomInt, randomUUID} from 'node:crypto';
 import path from 'node:path';
 import {EFileType} from '../models/enums/fileType';
 import {EEntityType} from '../models/enums/entityType';
@@ -89,7 +89,6 @@ const populate = async () => {
       const {common, format}: IAudioMetadata = await parseFile(
         directory + file
       );
-      console.log('🚀 ~ fs.readdir ~ format:', format);
       if (!common.date) {
         common.date = `${common.year ?? new Date().getFullYear()}0101`; // format YYYYMMDD
       }
@@ -102,12 +101,17 @@ const populate = async () => {
       let category_id = await createCategory(db, categories, categoryName);
 
       const artistName =
-        common.artist ?? common.artists?.at(0) ?? faker.music.genre();
+        common.artist ??
+        common.artists?.at(0)?.split('/').at(0) ?? // format " [ 'artist1/artist2' ] "
+        faker.music.genre();
       let artist_id = await createArtist(db, artists, artistName, category_id);
 
-      common.artists?.forEach(
-        async artist => await createArtist(db, artists, artist, category_id)
-      );
+      common.artists
+        ?.at(0)
+        ?.split('/')
+        ?.forEach(
+          async artist => await createArtist(db, artists, artist, category_id)
+        );
 
       const albumName = common.album ?? faker.music.album();
       let album_id = await createAlbum(
@@ -144,6 +148,7 @@ const populate = async () => {
       count++;
     }
     console.log('files processed:', count);
+    await createRandomUsers(db, 10, files.length);
   });
 };
 
@@ -275,5 +280,49 @@ const createTrack = async (
       })
       .execute();
     return dbTrack.id;
+  }
+};
+
+const createRandomUsers = async (
+  db: Kysely<Database>,
+  number: number,
+  fileLength: number
+) => {
+  for (let i = 0; i < number; i++) {
+    const user = await db
+      .insertInto('user')
+      .values({
+        email: faker.internet.email(),
+        password: faker.internet.password(),
+        username: faker.internet.username(),
+      })
+      .returningAll()
+      .executeTakeFirstOrThrow();
+
+    const playlist = await db
+      .insertInto('playlist')
+      .values({
+        title: faker.lorem.words(),
+        user_id: user?.id,
+      })
+      .returningAll()
+      .executeTakeFirstOrThrow();
+
+    const chosenNumbers = new Set();
+    for (let j = 0; j < 6; j++) {
+      let randomNumber;
+      do {
+        randomNumber = randomInt(1, fileLength - 1);
+      } while (chosenNumbers.has(randomNumber));
+      chosenNumbers.add(randomNumber);
+
+      await db
+        .insertInto('playlist_track')
+        .values({
+          playlist_id: playlist.id,
+          track_id: randomNumber,
+        })
+        .execute();
+    }
   }
 };
