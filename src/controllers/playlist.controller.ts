@@ -1,57 +1,31 @@
 import {Request, Response} from 'express';
 import {ApiResponse} from '../models/other/apiResponse';
-import {IPlaylistExt} from '../models/playlist';
+import {IPlaylist, IPlaylistExt, NewPlaylist} from '../models/playlist';
 import {EStatusCode} from '../models/enums/statusCode';
+import PlaylistRepository from '../repositories/playlist.repository';
+import {Error} from '../models/error';
 
 export default class PlaylistController {
-  constructor() {}
+  constructor(private readonly playlistRepository: PlaylistRepository) {}
 
   get = async (req: Request, res: Response) => {
     const playlistId = Number(req.params.id);
+    const playlist = await this.playlistRepository.getById(playlistId);
 
-    // Todo: Implement
-    const playlist: IPlaylistExt = {
-      id: playlistId,
-      title: 'Playlist 1',
-      user_id: 1,
-      tracks: [
-        {
-          id: 1,
-          album_id: 1,
-          duration: '400',
-          releaseDate: new Date(),
-          title: 'Track 1',
-          trackNumber: 1,
-          category_id: 1,
-          picture: undefined,
-          audio: '',
-        },
-        {
-          id: 2,
-          album_id: 1,
-          duration: '400',
-          releaseDate: new Date(),
-          title: 'Track 2',
-          trackNumber: 2,
-          category_id: 2,
-          picture: undefined,
-          audio: '',
-        },
-        {
-          id: 3,
-          album_id: 2,
-          duration: '400',
-          releaseDate: new Date(),
-          title: 'Track 3',
-          trackNumber: 3,
-          category_id: 1,
-          picture: undefined,
-          audio: '',
-        },
-      ],
-    };
+    if (!playlist) {
+      throw new Error(EStatusCode.NOT_FOUND);
+    }
 
     const apiResponse = new ApiResponse<IPlaylistExt>({data: playlist});
     res.status(EStatusCode.OK).send(apiResponse);
+  };
+
+  create = async (req: Request, res: Response) => {
+    // todo validations
+    const playlist = await this.playlistRepository.create(
+      req.body as NewPlaylist
+    );
+    const apiResponse = new ApiResponse<IPlaylist>({data: playlist});
+    res.status(EStatusCode.CREATED).send(apiResponse);
   };
 }

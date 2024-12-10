@@ -21,6 +21,7 @@ export default class AlbumController {
   };
 
   create = async (req: Request, res: Response) => {
+    // todo validations
     const album = await this.albumRepository.create(req.body as NewAlbum);
     const apiResponse = new ApiResponse<IAlbum>({data: album});
     res.status(EStatusCode.CREATED).send(apiResponse);

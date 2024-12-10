@@ -39,7 +39,7 @@ export default class AlbumRepository {
           eb
             .selectFrom('track')
             .selectAll('track')
-            .limit(5)
+            .limit(20)
             .where('track.album_id', '=', id)
         ).as('tracks'),
       ])

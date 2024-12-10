@@ -1,5 +1,5 @@
 import {Generated, Insertable, Selectable, Updateable} from 'kysely';
-import {ITrack, ITrackExt} from './track';
+import {ITrack} from './track';
 
 export interface PlaylistTable {
   id: Generated<number>;

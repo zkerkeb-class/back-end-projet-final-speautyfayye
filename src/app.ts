@@ -45,6 +45,7 @@ import CategoryRouter from './routers/category.router';
 import FileRepository from './repositories/file.repository';
 import ArtistRouter from './routers/artist.router';
 import ArtistController from './controllers/artist.controller';
+import PlaylistRepository from './repositories/playlist.repository';
 
 const limiter = new RateLimiter();
 const corsMiddleware = new CorsMiddleware();
@@ -66,6 +67,7 @@ const uploadRepository = new UploadRepository(logRepository);
 const trackRepository = new TrackRepository();
 const albumRepository = new AlbumRepository();
 const categoryRepository = new CategoryRepository();
+const playlistRepository = new PlaylistRepository();
 //#endregion
 
 //#region Services
@@ -96,7 +98,7 @@ const fileController = new ImageController(uploadService);
 const audioController = new AudioController(audioService);
 const errorController = new ErrorController(logRepository);
 const userController = new UserController();
-const playlistController = new PlaylistController();
+const playlistController = new PlaylistController(playlistRepository);
 const trackController = new TrackController(trackRepository);
 const albumController = new AlbumController(albumRepository);
 const categoryController = new CategoryController(categoryRepository);

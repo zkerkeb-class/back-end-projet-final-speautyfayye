@@ -7,7 +7,8 @@
     "build": "npx tsc",
     "start": "node --import dd-trace/register.js dist/index.js",
     "dev": "nodemon  src/index.ts",
-    "prepare": "node .husky/install.mjs"
+    "prepare": "node .husky/install.mjs",
+    "populate": "ts-node src/populate.ts"
   },
   "keywords": [],
   "author": "",
