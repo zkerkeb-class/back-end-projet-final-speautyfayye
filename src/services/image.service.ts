@@ -1,11 +1,9 @@
-import path from 'node:path';
 import {EImageExtension, Extension} from '../models/enums/extension';
 import {EFileType} from '../models/enums/fileType';
 import UploadRepository, {IDirectory} from '../repositories/upload.repository';
 import ConvertService, {IConvertImageOutput} from './convert.service';
 import {ReadStream} from 'node:fs';
 import FileRepository from '../repositories/file.repository';
-import {EEntityType} from '../models/enums/entityType';
 
 export default class ImageService {
   private readonly sizes = [200, 400, 800];

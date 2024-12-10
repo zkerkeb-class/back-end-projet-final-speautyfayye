@@ -8,7 +8,7 @@
     "start": "node --import dd-trace/register.js dist/index.js",
     "dev": "nodemon  src/index.ts",
     "prepare": "node .husky/install.mjs",
-    "populate": "ts-node src/populate.ts"
+    "populate": "ts-node src/__populate__/populate.ts"
   },
   "keywords": [],
   "author": "",

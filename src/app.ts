@@ -56,7 +56,7 @@ app.use(cors(corsMiddleware.options));
 app.use(compression());
 app.use(express.json({limit: '10kb'}));
 app.use(cookieParser());
-app.use(limiter.global);
+// app.use(limiter.global);
 
 migrateToLatest();
 
