@@ -1,6 +1,6 @@
 import {jsonArrayFrom} from 'kysely/helpers/postgres';
 import {db} from '../config/db/db';
-import {IAlbum, IAlbumExt, NewAlbum} from '../models/album';
+import {AlbumExt, IAlbum, IAlbumExt, NewAlbum} from '../models/album';
 import {EEntityType} from '../models/enums/entityType';
 import {EFileType} from '../models/enums/fileType';
 
@@ -30,7 +30,7 @@ export default class AlbumRepository {
     return newAlbum;
   };
 
-  get = async (id: number): Promise<IAlbumExt | undefined> => {
+  getById = async (id: number): Promise<IAlbumExt | undefined> => {
     return await db
       .selectFrom('album')
       .selectAll()
@@ -47,13 +47,32 @@ export default class AlbumRepository {
       .executeTakeFirst();
   };
 
-  getAll = async (categoryId?: number): Promise<IAlbum[]> => {
-    let query = db.selectFrom('album').selectAll();
+  getAll = async (options?: {
+    artistId?: number;
+    category?: number;
+    releaseDate?: Date;
+}): Promise<IAlbum[]> => {
+    let query = db
+        .selectFrom('album')
+        .selectAll();
 
-    if (categoryId) {
-      query = query.where('album.category_id', '=', categoryId);
+    if (options?.artistId) {
+        query = query
+            .innerJoin('artist_album', 'artist_album.album_id', 'album.id')
+            .where('artist_album.artist_id', '=', options.artistId);
     }
 
-    return await query.execute();
-  };
+    if (options?.category) {
+        query = query
+            .where('album.category_id', '=', options.category);
+    }
+
+    if (options?.releaseDate) {
+        query = query
+            .where('album.releaseDate', '=', options.releaseDate);
+    }
+
+    return await query
+      .execute();
+};
 }

@@ -10,10 +10,8 @@ export default class AlbumRouter {
   }
 
   private createRoutes() {
-    this.router.route('/:id').get(this.albumController.get);
-
-    this.router.route('/').get(this.albumController.getAll);
-
+    this.router.route('/:id').get(this.albumController.getById);
     this.router.route('/').post(this.albumController.create);
+    this.router.route('/').get(this.albumController.getAllWithFilters);
   }
 }
