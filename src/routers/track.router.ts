@@ -25,5 +25,6 @@ export default class TrackRouter {
     this.router.route('/:id').get(this.trackController.get);
 
     this.router.route('/').post(this.trackController.create);
+    this.router.route('/').get(this.trackController.getAllWithFilters);
   }
 }

@@ -25,4 +25,10 @@ export default class TrackController {
     const apiResponse = new ApiResponse<ITrack>({data: track});
     res.status(EStatusCode.CREATED).send(apiResponse);
   };
+
+  getAllWithFilters = async (req: Request, res: Response) => {
+    const tracks = await this.trackRepository.getAllWithFilters(req.query);
+    const apiResponse = new ApiResponse<ITrack[]>({data: tracks});
+    res.status(EStatusCode.OK).send(apiResponse);
+  }
 }

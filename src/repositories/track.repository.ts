@@ -62,4 +62,59 @@ export default class TrackRepository {
       .where('track.id', '=', id)
       .executeTakeFirst();
   };
+
+  getAllWithFilters = async (options?: {
+      artistId?: number;
+      albumId?: number;
+      category?: number;
+      releaseDate?: Date;
+      minDuration?: number;
+      maxDuration?:number;
+      playlistId?: number;
+  }): Promise<ITrack[]> => {
+      let query = db
+          .selectFrom('track')
+          .selectAll();
+  
+      if (options?.artistId) {
+        query = query
+          .innerJoin('album', 'album.id', 'track.album_id')
+          .innerJoin('artist_album', 'artist_album.album_id', 'album.id')
+          .where('artist_album.artist_id', '=', options.artistId);
+      }
+      
+      if (options?.albumId) {
+        query = query
+          .where('track.album_id', '=', options.albumId);
+      }
+
+
+      if (options?.category) {
+          query = query
+              .where('track.category_id', '=', options.category);
+      }
+  
+      if (options?.releaseDate) {
+          query = query
+              .where('track.releaseDate', '=', options.releaseDate);
+      }
+
+      if (options?.playlistId) {
+        query = query 
+          .innerJoin('playlist_track', 'playlist_track.track_id', 'track.id')
+          .where('playlist_track.playlist_id', '=', options.playlistId);
+      }
+
+      if(options?.minDuration) {
+          query = query
+              .where('track.duration', '>=', options.minDuration);
+      }
+
+      if (options?.maxDuration) {
+          query = query
+              .where('track.duration', '<=', options.maxDuration);
+      }
+      return await query
+        .execute();
+  };
 }
