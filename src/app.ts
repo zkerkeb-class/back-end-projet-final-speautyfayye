@@ -47,6 +47,7 @@ import ArtistRouter from './routers/artist.router';
 import ArtistController from './controllers/artist.controller';
 import PlaylistRepository from './repositories/playlist.repository';
 import UserRepository from './repositories/user.repository';
+import ArtistRepository from './repositories/artist.repository';
 
 const limiter = new RateLimiter();
 const corsMiddleware = new CorsMiddleware();
@@ -70,6 +71,7 @@ const albumRepository = new AlbumRepository();
 const categoryRepository = new CategoryRepository();
 const playlistRepository = new PlaylistRepository();
 const userRepository = new UserRepository();
+const artistRepository = new ArtistRepository();
 //#endregion
 
 //#region Services
@@ -104,7 +106,7 @@ const playlistController = new PlaylistController(playlistRepository);
 const trackController = new TrackController(trackRepository);
 const albumController = new AlbumController(albumRepository);
 const categoryController = new CategoryController(categoryRepository);
-const artistController = new ArtistController(artistService);
+const artistController = new ArtistController(artistRepository);
 //#endregion
 
 //#region Routers
