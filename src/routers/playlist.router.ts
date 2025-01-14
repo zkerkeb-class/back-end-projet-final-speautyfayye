@@ -10,6 +10,7 @@ export default class PlaylistRouter {
   }
 
   private createRoutes() {
+    this.router.route('/').get(this.playlistController.getAll);
     this.router.route('/:id').get(this.playlistController.get);
 
     this.router.route('/').post(this.playlistController.create);

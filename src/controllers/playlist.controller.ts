@@ -29,4 +29,10 @@ export default class PlaylistController {
     const apiResponse = new ApiResponse<IPlaylist>({data: playlist});
     res.status(EStatusCode.CREATED).send(apiResponse);
   };
+
+  getAll = async (req: Request, res: Response) => {
+    const playlists = await this.playlistRepository.getAll();
+    const apiResponse = new ApiResponse<IPlaylist[]>({data: playlists});
+    res.status(EStatusCode.OK).send(apiResponse);
+    };
 }

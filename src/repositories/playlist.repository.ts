@@ -37,4 +37,8 @@ export default class PlaylistRepository {
       .where('playlist.user_id', '=', userId)
       .execute();
   };
+
+  getAll = async (): Promise<IPlaylist[]> => {
+    return db.selectFrom('playlist').selectAll().execute();
+  }
 }
