@@ -1,8 +1,5 @@
-import {EStatusCode} from '../models/enums/statusCode';
-import {Error} from '../models/error';
-
 export default class CorsMiddleware {
-  allowedOrigins = ['http://example.com'];
+  allowedOrigins = ['http://example.com', 'http://localhost:3000'];
   options = {};
 
   constructor() {
