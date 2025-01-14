@@ -26,4 +26,11 @@ export default class AlbumController {
     const apiResponse = new ApiResponse<IAlbum>({data: album});
     res.status(EStatusCode.CREATED).send(apiResponse);
   };
+
+  getAll = async (req: Request, res: Response) => {
+    const category = Number(req.query.category);
+    const albums = await this.albumRepository.getAll(category);
+    const apiResponse = new ApiResponse<AlbumExt[]>({data: albums});
+    res.status(EStatusCode.OK).send(apiResponse);
+  };
 }

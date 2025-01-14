@@ -46,4 +46,14 @@ export default class AlbumRepository {
       .where('album.id', '=', id)
       .executeTakeFirst();
   };
+
+  getAll = async (categoryId?: number): Promise<IAlbum[]> => {
+    let query = db.selectFrom('album').selectAll();
+
+    if (categoryId) {
+      query = query.where('album.category_id', '=', categoryId);
+    }
+
+    return await query.execute();
+  };
 }
