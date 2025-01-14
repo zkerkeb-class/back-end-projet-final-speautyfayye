@@ -255,6 +255,7 @@ const createTrack = async (
       )?.id ?? 0
     );
   } else {
+    const number_of_plays = randomInt(50, 1000); //à modifier lors de l'insertion track
     const dbTrack = await db
       .insertInto('track')
       .values({
@@ -265,6 +266,7 @@ const createTrack = async (
         audio,
         duration,
         trackNumber,
+        number_of_plays,
       })
       .returningAll()
       .executeTakeFirstOrThrow();

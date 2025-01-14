@@ -12,6 +12,7 @@ export interface TrackTable {
   category_id: number;
   picture: string | undefined;
   audio: string;
+  number_of_plays: number;
 }
 
 export type ITrack = Selectable<TrackTable>;
@@ -28,6 +29,7 @@ export class Track implements ITrack {
   category_id: number;
   picture: string | undefined;
   audio: string;
+  number_of_plays: number;
 
   constructor(data: ITrack) {
     this.id = data.id;
@@ -39,6 +41,7 @@ export class Track implements ITrack {
     this.category_id = data.category_id;
     this.picture = data.picture;
     this.audio = data.audio;
+    this.number_of_plays = data.number_of_plays;
   }
 }
 

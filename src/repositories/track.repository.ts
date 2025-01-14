@@ -71,6 +71,8 @@ export default class TrackRepository {
       minDuration?: number;
       maxDuration?:number;
       playlistId?: number;
+      maxNumberOfPlays?: number;
+      minNumberOfPlays?: number;
   }): Promise<ITrack[]> => {
       let query = db
           .selectFrom('track')
@@ -87,7 +89,6 @@ export default class TrackRepository {
         query = query
           .where('track.album_id', '=', options.albumId);
       }
-
 
       if (options?.category) {
           query = query
@@ -113,6 +114,16 @@ export default class TrackRepository {
       if (options?.maxDuration) {
           query = query
               .where('track.duration', '<=', options.maxDuration);
+      }
+
+      if (options?.minNumberOfPlays) {
+          query = query
+              .where('track.number_of_plays', '>=', options.minNumberOfPlays);
+      }
+
+      if (options?.maxNumberOfPlays) {
+          query = query
+              .where('track.number_of_plays', '<=', options.maxNumberOfPlays);
       }
       return await query
         .execute();

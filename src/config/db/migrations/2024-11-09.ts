@@ -52,6 +52,7 @@ export async function up(db: Kysely<any>): Promise<void> {
     .addColumn('duration', 'decimal')
     .addColumn('releaseDate', 'timestamp')
     .addColumn('trackNumber', 'integer')
+    .addColumn('number_of_plays', 'integer')
     .addColumn('album_id', 'integer', col =>
       col.references('album.id').onDelete('cascade')
     )
