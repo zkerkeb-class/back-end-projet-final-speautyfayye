@@ -147,7 +147,7 @@ const populate = async () => {
 
       count++;
     }
-    console.log('files processed:', count);
+    console.info('files processed:', count);
     await createRandomUsers(db, 10, files.length);
   });
 };
@@ -256,6 +256,7 @@ const createTrack = async (
     );
   } else {
     const number_of_plays = randomInt(50, 1000); //à modifier lors de l'insertion track
+    const lyrics = faker.lorem.lines({min: 20, max: 40});
     const dbTrack = await db
       .insertInto('track')
       .values({
@@ -267,6 +268,7 @@ const createTrack = async (
         duration,
         trackNumber,
         number_of_plays,
+        lyrics,
       })
       .returningAll()
       .executeTakeFirstOrThrow();

@@ -29,13 +29,14 @@ export default class AudioController {
   };
 
   get = async (req: Request, res: Response) => {
+    setTimeout(() => {}, 2000);
+
     const trackId = Number(req.params.id);
     if (!trackId || isNaN(trackId)) {
       throw new Error(EStatusCode.BAD_REQUEST);
     }
 
     const track = await this.trackRepository.getById(trackId);
-    console.log('🚀 ~ AudioController ~ get= ~ track:', track);
     if (!track) {
       throw new Error(EStatusCode.NOT_FOUND, {
         message: `Track with id ${trackId} not found`,

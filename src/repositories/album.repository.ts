@@ -1,4 +1,4 @@
-import {jsonArrayFrom} from 'kysely/helpers/postgres';
+import {jsonArrayFrom, jsonObjectFrom} from 'kysely/helpers/postgres';
 import {db} from '../config/db/db';
 import {AlbumExt, IAlbum, IAlbumExt, NewAlbum} from '../models/album';
 import {EEntityType} from '../models/enums/entityType';
@@ -42,6 +42,13 @@ export default class AlbumRepository {
             .limit(20)
             .where('track.album_id', '=', id)
         ).as('tracks'),
+        jsonObjectFrom(
+          eb
+            .selectFrom('artist_album')
+            .innerJoin('artist', 'artist.id', 'artist_album.artist_id')
+            .selectAll('artist')
+            .where('artist_album.album_id', '=', id)
+        ).as('artist'),
       ])
       .where('album.id', '=', id)
       .executeTakeFirst();
@@ -51,28 +58,23 @@ export default class AlbumRepository {
     artistId?: number;
     category?: number;
     releaseDate?: Date;
-}): Promise<IAlbum[]> => {
-    let query = db
-        .selectFrom('album')
-        .selectAll();
+  }): Promise<IAlbum[]> => {
+    let query = db.selectFrom('album').selectAll();
 
     if (options?.artistId) {
-        query = query
-            .innerJoin('artist_album', 'artist_album.album_id', 'album.id')
-            .where('artist_album.artist_id', '=', options.artistId);
+      query = query
+        .innerJoin('artist_album', 'artist_album.album_id', 'album.id')
+        .where('artist_album.artist_id', '=', options.artistId);
     }
 
     if (options?.category) {
-        query = query
-            .where('album.category_id', '=', options.category);
+      query = query.where('album.category_id', '=', options.category);
     }
 
     if (options?.releaseDate) {
-        query = query
-            .where('album.releaseDate', '=', options.releaseDate);
+      query = query.where('album.releaseDate', '=', options.releaseDate);
     }
 
-    return await query
-      .execute();
-};
+    return await query.execute();
+  };
 }

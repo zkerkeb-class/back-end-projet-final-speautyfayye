@@ -1,6 +1,7 @@
 import {Generated, Insertable, Selectable, Updateable} from 'kysely';
 import {ICategory} from './category';
 import {IAlbum} from './album';
+import {IArtist} from './artist';
 
 export interface TrackTable {
   id: Generated<number>;
@@ -13,6 +14,7 @@ export interface TrackTable {
   picture: string | undefined;
   audio: string;
   number_of_plays: number;
+  lyrics: string | undefined;
 }
 
 export type ITrack = Selectable<TrackTable>;
@@ -30,6 +32,7 @@ export class Track implements ITrack {
   picture: string | undefined;
   audio: string;
   number_of_plays: number;
+  lyrics: string | undefined;
 
   constructor(data: ITrack) {
     this.id = data.id;
@@ -42,21 +45,25 @@ export class Track implements ITrack {
     this.picture = data.picture;
     this.audio = data.audio;
     this.number_of_plays = data.number_of_plays;
+    this.lyrics = data.lyrics;
   }
 }
 
 export interface ITrackExt extends ITrack {
   category: ICategory | null;
   album: IAlbum | null;
+  artist: IArtist | null;
 }
 
 export class TrackExt extends Track implements ITrackExt {
   category: ICategory | null;
   album: IAlbum | null;
+  artist: IArtist | null;
 
   constructor(data: ITrackExt) {
     super(data);
     this.category = data.category;
     this.album = data.album;
+    this.artist = data.artist;
   }
 }

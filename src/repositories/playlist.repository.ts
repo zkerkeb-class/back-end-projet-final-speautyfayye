@@ -4,7 +4,6 @@ import {IPlaylist, IPlaylistExt, NewPlaylist} from '../models/playlist';
 
 export default class PlaylistRepository {
   create = async (playlist: NewPlaylist): Promise<IPlaylist> => {
-    console.log('🚀 ~ PlaylistRepository ~ create= ~ playlist:', playlist);
     return await db
       .insertInto('playlist')
       .values(playlist)
@@ -40,5 +39,5 @@ export default class PlaylistRepository {
 
   getAll = async (): Promise<IPlaylist[]> => {
     return db.selectFrom('playlist').selectAll().execute();
-  }
+  };
 }

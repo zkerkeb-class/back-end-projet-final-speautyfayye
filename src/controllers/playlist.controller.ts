@@ -22,7 +22,6 @@ export default class PlaylistController {
 
   create = async (req: Request, res: Response) => {
     // todo validations
-    console.log('🚀 ~ PlaylistController ~ create= ~ req.body:', req.body);
     const playlist = await this.playlistRepository.create(
       req.body as NewPlaylist
     );
@@ -34,5 +33,5 @@ export default class PlaylistController {
     const playlists = await this.playlistRepository.getAll();
     const apiResponse = new ApiResponse<IPlaylist[]>({data: playlists});
     res.status(EStatusCode.OK).send(apiResponse);
-    };
+  };
 }
