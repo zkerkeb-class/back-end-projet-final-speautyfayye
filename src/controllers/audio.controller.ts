@@ -3,9 +3,13 @@ import {EStatusCode} from '../models/enums/statusCode';
 import AudioService from '../services/audio.service';
 import {Error} from '../models/error';
 import {ApiResponse} from '../models/other/apiResponse';
+import TrackRepository from '../repositories/track.repository';
 
 export default class AudioController {
-  constructor(private readonly audioService: AudioService) {}
+  constructor(
+    private readonly audioService: AudioService,
+    private readonly trackRepository: TrackRepository
+  ) {}
 
   upload = async (req: Request, res: Response) => {
     if (!req.files?.length) {
@@ -25,26 +29,48 @@ export default class AudioController {
   };
 
   get = async (req: Request, res: Response) => {
-    const {name} = req.params;
-    const {range} = req.headers;
-
-    if (!name) {
+    const trackId = Number(req.params.id);
+    if (!trackId || isNaN(trackId)) {
       throw new Error(EStatusCode.BAD_REQUEST);
     }
 
-    if (range) {
-      const {readable, chunkSize, end, start, fileSize} =
-        this.audioService.readPartial(`${name}.mp3`, range);
-      res.writeHead(EStatusCode.PARTIAL_CONTENT, {
-        'Content-Range': `bytes ${start}-${end}/${fileSize}`,
-        'Accept-Ranges': 'bytes',
-        'Content-Length': chunkSize,
-        'Content-Type': 'audio/mp3',
+    const track = await this.trackRepository.getById(trackId);
+    console.log('🚀 ~ AudioController ~ get= ~ track:', track);
+    if (!track) {
+      throw new Error(EStatusCode.NOT_FOUND, {
+        message: `Track with id ${trackId} not found`,
       });
+    }
 
-      readable.pipe(res);
-    } else {
-      this.audioService.read(name).pipe(res);
+    try {
+      const {range} = req.headers;
+      if (range) {
+        const {readable, chunkSize, end, start, fileSize} =
+          this.audioService.readPartial(`${track.audio}.mp3`, range);
+        res.writeHead(EStatusCode.PARTIAL_CONTENT, {
+          'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+          'Accept-Ranges': 'bytes',
+          'Content-Length': chunkSize,
+          'Content-Type': 'audio/mp3',
+          duration: track.duration,
+          'Access-Control-Expose-Headers':
+            'Content-Range, Content-Length, duration',
+        });
+
+        readable.pipe(res);
+      } else {
+        const {readable} = this.audioService.read(track.audio);
+        res.writeHead(EStatusCode.PARTIAL_CONTENT, {
+          'Content-Type': 'audio/mp3',
+          duration: track.duration,
+          'Access-Control-Expose-Headers': 'duration',
+        });
+        readable.pipe(res);
+      }
+    } catch (error) {
+      throw new Error(EStatusCode.INTERNAL_SERVER_ERROR, {
+        message: `error while reading file ${trackId}`,
+      });
     }
   };
 }

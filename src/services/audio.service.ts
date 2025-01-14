@@ -38,19 +38,24 @@ export default class AudioService {
     return uuid;
   }
 
-  read(name: string): ReadStream {
+  read(name: string): {
+    readable: Readable;
+  } {
     const directory: IDirectory = {
       name,
       subFolder: false,
       type: EFileType.AUDIO,
     };
-    return this.uploadRepository.read(
-      {
-        ...directory,
-        extension: EAudioExtension.MP3,
-      },
-      this.uploadRepository.getDirPath(directory)
-    );
+
+    return {
+      readable: this.uploadRepository.read(
+        {
+          ...directory,
+          extension: EAudioExtension.MP3,
+        },
+        this.uploadRepository.getDirPath(directory)
+      ),
+    };
   }
 
   readPartial(
@@ -89,7 +94,7 @@ export default class AudioService {
         },
         this.uploadRepository.getDirPath(directory),
         start,
-        end
+        stats.size
       ),
       chunkSize,
       start,

@@ -24,7 +24,7 @@ export default class AudioRouter {
       .route('/upload')
       .post(this.multer.array('files'), this.audioController.upload);
 
-    this.router.route('/:name').get(this.audioController.get);
+    this.router.route('/:id').get(this.audioController.get);
   }
 
   private fileFilter(
