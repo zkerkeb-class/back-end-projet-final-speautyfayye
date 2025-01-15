@@ -17,6 +17,7 @@ export default class ArtistRepository {
                     .where('category_id', '=', option.category_id);
             }
 
+            query = query.orderBy('artist.name', 'asc');
             return await query.execute();
     }
 

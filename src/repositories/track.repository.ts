@@ -131,6 +131,10 @@ export default class TrackRepository {
         options.maxNumberOfPlays
       );
     }
+    query = query.orderBy('track.number_of_plays', 'desc');
+    query = query.orderBy('track.title', 'asc');
+
     return await query.execute();
+
   };
 }
