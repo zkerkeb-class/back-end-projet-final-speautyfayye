@@ -7,6 +7,8 @@ import compression from 'compression';
 
 import UploadRepository from './repositories/upload.repository';
 
+// import MeasureRequestTime from './middleware/request-timer.middleware';
+
 import ConvertService from './services/convert.service';
 import ImageService from './services/image.service';
 import AudioService from './services/audio.service';
@@ -48,9 +50,13 @@ import ArtistController from './controllers/artist.controller';
 import PlaylistRepository from './repositories/playlist.repository';
 import UserRepository from './repositories/user.repository';
 import ArtistRepository from './repositories/artist.repository';
+import SearchRouter from './routers/search.router';
+import SearchController from './controllers/search.controller';
+import SearchRepository from './repositories/search.repository';
 
 const limiter = new RateLimiter();
 const corsMiddleware = new CorsMiddleware();
+// const measureRequestTime = new MeasureRequestTime();
 
 const app: Express = express();
 app.use(helmet());
@@ -58,6 +64,7 @@ app.use(cors(corsMiddleware.options));
 app.use(compression());
 app.use(express.json({limit: '10kb'}));
 app.use(cookieParser());
+// app.use(measureRequestTime.get);
 // app.use(limiter.global);
 
 migrateToLatest();
@@ -72,6 +79,7 @@ const categoryRepository = new CategoryRepository();
 const playlistRepository = new PlaylistRepository();
 const userRepository = new UserRepository();
 const artistRepository = new ArtistRepository();
+const searchRepository = new SearchRepository();
 //#endregion
 
 //#region Services
@@ -112,6 +120,7 @@ const trackController = new TrackController(trackRepository);
 const albumController = new AlbumController(albumRepository);
 const categoryController = new CategoryController(categoryRepository);
 const artistController = new ArtistController(artistRepository);
+const searchController = new SearchController(searchRepository);
 //#endregion
 
 //#region Routers
@@ -128,6 +137,7 @@ const trackRouter = new TrackRouter(trackController);
 const albumRouter = new AlbumRouter(albumController);
 const categoryRouter = new CategoryRouter(categoryController);
 const artistRouter = new ArtistRouter(artistController);
+const searchRouter = new SearchRouter(searchController);
 //#endregion
 
 //#region Endpoints
@@ -141,6 +151,7 @@ app.use('/track', trackRouter.router);
 app.use('/album', albumRouter.router);
 app.use('/category', categoryRouter.router);
 app.use('/artist', artistRouter.router);
+app.use('/search', searchRouter.router);
 app.use(errorController.errorHandler);
 //#endregion
 
