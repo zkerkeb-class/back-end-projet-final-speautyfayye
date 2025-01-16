@@ -8,20 +8,17 @@ export default class SearchController {
   constructor(private readonly searchRepository: SearchRepository) {}
 
   get = async (req: Request, res: Response) => {
-    const {input} = req.query;
-    if (typeof input !== 'string') {
-        throw new Error(EStatusCode.BAD_REQUEST, {
-            message: 'Invalid input type',
-        });
-    }
-    const search = await this.searchRepository.search(input);
-    const apiResponse = new ApiResponse({data: search});
-
+    const {input, limit} = req.query;
+    const searchInput = typeof input === 'string' ? input : undefined;
+    const searchLimit = typeof limit === 'string' ? parseInt(limit, 5) : undefined;
+    const search = await this.searchRepository.search(searchInput, searchLimit);
+    
     if (!search) {
         throw new Error(EStatusCode.NOT_FOUND, {
             message: 'Track not found',
         });
     };
+    const apiResponse = new ApiResponse({data: search});
 
     res.status(EStatusCode.OK).send(apiResponse);
 

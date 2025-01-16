@@ -13,39 +13,33 @@ interface SearchOutput {
 }
 
 export default class SearchRepository {
-    async search(
-        input: string,
-        limit: number = 5
-    ): Promise<SearchOutput> {
-    
-        const artists = await db
-            .selectFrom('artist')
-            .selectAll()
-            .where('artist.name', 'ilike', `%${input}%`)
-            .limit(limit)
-            .execute() as IArtist[]
-
-        const albums = await db
-            .selectFrom('album')
-            .selectAll()
-            .where('album.title', 'ilike', `%${input}%`)
-            .limit(limit)
-            .execute() as IAlbum[]
-
-        const playlists = await db
-            .selectFrom('playlist')
-            .selectAll()
-            .where('playlist.title', 'ilike', `%${input}%`)
-            .limit(limit)
-            .execute() as IPlaylist[]
-
-        const tracks = await db
-            .selectFrom('track')
-            .selectAll()
-            .where('track.title', 'ilike', `%${input}%`)
-            .limit(limit)
-            .execute() as ITrack[]
-
+    async search(input: string | undefined , limit: number = 5): Promise<SearchOutput> {
+        const [artists, albums, playlists, tracks] = await Promise.all([
+            db
+                .selectFrom('artist')
+                .selectAll()
+                .where('artist.name', 'ilike', `%${input}%`)
+                .limit(limit)
+                .execute(),
+            db
+                .selectFrom('album')
+                .selectAll()
+                .where('album.title', 'ilike', `%${input}%`)
+                .limit(limit)
+                .execute(),
+            db
+                .selectFrom('playlist')
+                .selectAll()
+                .where('playlist.title', 'ilike', `%${input}%`)
+                .limit(limit)
+                .execute(),
+            db
+                .selectFrom('track')
+                .selectAll()
+                .where('track.title', 'ilike', `%${input}%`)
+                .limit(limit)
+                .execute()
+        ]);               
 
         return {
             "artists": artists,
