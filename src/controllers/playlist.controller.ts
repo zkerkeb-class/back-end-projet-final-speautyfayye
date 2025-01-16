@@ -1,9 +1,9 @@
 import {Request, Response} from 'express';
-import {ApiResponse} from '../models/other/apiResponse';
-import {IPlaylist, IPlaylistExt, NewPlaylist, PlaylistUpdate} from '../models/playlist';
 import {EStatusCode} from '../models/enums/statusCode';
-import PlaylistRepository from '../repositories/playlist.repository';
 import {Error} from '../models/error';
+import {ApiResponse} from '../models/other/apiResponse';
+import {IPlaylist, IPlaylistExt, PlaylistUpdate} from '../models/playlist';
+import PlaylistRepository from '../repositories/playlist.repository';
 
 export default class PlaylistController {
   constructor(private readonly playlistRepository: PlaylistRepository) {}
@@ -21,10 +21,12 @@ export default class PlaylistController {
   };
 
   create = async (req: Request, res: Response) => {
-    // todo validations
-    const playlist = await this.playlistRepository.create(
-      req.body as NewPlaylist
-    );
+    // todo changer le userId
+    const userId = 1;
+    const playlist = await this.playlistRepository.create({
+      ...req.body,
+      user_id: userId,
+    });
     const apiResponse = new ApiResponse<IPlaylist>({data: playlist});
     res.status(EStatusCode.CREATED).send(apiResponse);
   };
@@ -42,7 +44,7 @@ export default class PlaylistController {
     }
     await this.playlistRepository.deleteById(playlistId);
     res.status(EStatusCode.OK).send();
-  }
+  };
 
   update = async (req: Request, res: Response) => {
     const playlistId = Number(req.params.id);
@@ -55,5 +57,5 @@ export default class PlaylistController {
     );
     const apiResponse = new ApiResponse<IPlaylist>({data: playlist});
     res.status(EStatusCode.OK).send(apiResponse);
-  }
+  };
 }

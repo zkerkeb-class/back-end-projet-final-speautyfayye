@@ -1,6 +1,11 @@
 import {jsonArrayFrom} from 'kysely/helpers/postgres';
 import {db} from '../config/db/db';
-import {IPlaylist, IPlaylistExt, NewPlaylist, PlaylistUpdate} from '../models/playlist';
+import {
+  IPlaylist,
+  IPlaylistExt,
+  NewPlaylist,
+  PlaylistUpdate,
+} from '../models/playlist';
 
 export default class PlaylistRepository {
   create = async (playlist: NewPlaylist): Promise<IPlaylist> => {
@@ -38,14 +43,37 @@ export default class PlaylistRepository {
   };
 
   getAll = async (): Promise<IPlaylist[]> => {
-    return db.selectFrom('playlist').selectAll().execute();
+    const playlists = await db
+      .selectFrom('playlist')
+      .selectAll('playlist')
+      .select(eb => [
+        jsonArrayFrom(
+          eb
+            .selectFrom('track')
+            .innerJoin('playlist_track', 'track.id', 'playlist_track.track_id')
+            .whereRef('playlist_track.playlist_id', '=', 'playlist.id')
+            .select(['track.picture'])
+            .where('track.picture', 'is not', null)
+            .limit(4)
+        ).as('tracks'),
+      ])
+      .execute();
+
+    console.log(
+      '🚀 ~ PlaylistRepository ~ getAll= ~ playlists:',
+      playlists.map(p => p.tracks)
+    );
+    return playlists;
   };
 
   deleteById = async (id: number): Promise<void> => {
     await db.deleteFrom('playlist').where('id', '=', id).execute();
   };
 
-  updateById = async (id: number, playlist: PlaylistUpdate): Promise<IPlaylist> => {
+  updateById = async (
+    id: number,
+    playlist: PlaylistUpdate
+  ): Promise<IPlaylist> => {
     return await db
       .updateTable('playlist')
       .set(playlist)

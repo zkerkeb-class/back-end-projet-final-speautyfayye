@@ -1,18 +1,6 @@
 import express, {Router} from 'express';
 import UserController from '../controllers/user.controller';
 
-// Page d'accueil
-
-// Mes playlists
-// Les 10 derniers sons
-// Les 10 artistes populaires
-// Les 10 derniers albums
-
-// Page de recherche
-
-// Search
-// Catégories
-
 export default class UserRouter {
   router: Router;
 
@@ -26,5 +14,4 @@ export default class UserRouter {
     this.router.route('/playlists/:id').get(this.userController.getPlaylists);
     this.router.route('/:id').get(this.userController.getUser);
   }
-
 }
