@@ -1,15 +1,23 @@
+import {compare, hash} from 'bcryptjs';
+import {Request} from 'express';
 import {JwtPayload, sign, verify} from 'jsonwebtoken';
 import {EStatusCode} from '../models/enums/statusCode';
 import {Error} from '../models/error';
-import {Request} from 'express';
 
-const accessSecret = 'def';
-const refreshSecret = 'deffe';
+export const accessSecret = 'def';
+export const refreshSecret = 'deffe';
 
 export default class AuthService {
+  async hashPassword(password: any): Promise<string> {
+    return await hash(password, 10);
+  }
+
+  async check(password: string, cryptedPassword: string): Promise<boolean> {
+    return await compare(password, cryptedPassword);
+  }
   generateAccessToken(userId: number) {
     try {
-      return sign({_id: userId}, accessSecret, {expiresIn: '5m'});
+      return sign({_id: userId}, accessSecret, {expiresIn: '2d'});
     } catch (error) {
       throw new Error(EStatusCode.INTERNAL_SERVER_ERROR);
     }

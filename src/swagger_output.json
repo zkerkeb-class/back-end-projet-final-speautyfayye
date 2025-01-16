@@ -2,19 +2,37 @@
   "openapi": "3.0.0",
   "info": {
     "version": "v1.0.0",
-    "title": "Swagger Demo Project",
-    "description": "Implementation of Swagger with TypeScript"
+    "title": "Speautyfayye",
+    "description": "API Documentation"
   },
   "servers": [
     {
-      "url": "http://localhost:3000",
+      "url": "http://localhost:3001",
       "description": ""
     }
   ],
   "paths": {
-    "/upload": {
+    "/upload/{entityTypeId}/{entityId}": {
       "post": {
         "description": "",
+        "parameters": [
+          {
+            "name": "entityTypeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "entityId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "default": {
             "description": ""
@@ -32,8 +50,34 @@
         }
       }
     },
-    "/{name}": {
+    "/upload": {
+      "post": {
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/{id}": {
       "get": {
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      },
+      "delete": {
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      },
+      "put": {
         "description": "",
         "responses": {
           "default": {
@@ -72,7 +116,25 @@
         }
       }
     },
-    "/playlists": {
+    "/": {
+      "get": {
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      },
+      "post": {
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/playlists/{id}": {
       "get": {
         "description": "",
         "responses": {
@@ -82,7 +144,7 @@
         }
       }
     },
-    "/{id}": {
+    "/{name}": {
       "get": {
         "description": "",
         "responses": {

@@ -1,59 +1,73 @@
-import { Request, Response } from 'express';
-import AuthService from '../services/auth.service';
-import { EStatusCode } from '../models/enums/statusCode';
+import {Request, Response} from 'express';
+import {EStatusCode} from '../models/enums/statusCode';
+import {Error} from '../models/error';
 import UserRepository from '../repositories/user.repository';
-import { NewUser } from '../models/user';
+import AuthService from '../services/auth.service';
+import AuthValidators from '../validators/auth.validators';
 
 export default class AuthController {
-  fakeUsers = [
-    {
-      id: 1,
-      username: "admin",
-      email: 'admin@cdn.com',
-      password: 'password',
-    },
-    {
-      id: 2,
-      username: "user",
-      email: 'user@cdn.com',
-      password: 'password',
-    },
-  ];
-
   constructor(
     private readonly authService: AuthService,
-    private readonly userRepository: UserRepository) {}
+    private readonly userRepository: UserRepository,
+    private readonly authValidators: AuthValidators
+  ) {}
 
   login = async (req: Request, res: Response) => {
-    const { email, password } = req.body;
+    const {email, password} = req.body;
     if (
-      this.fakeUsers.find((u) => u.email === email && u.password === password)
+      !this.authValidators.isEmailValid(email) ||
+      !this.authValidators.isPasswordValid(password)
     ) {
-      const tokens = {
-        accessToken: this.authService.generateAccessToken(1),
-        refreshToken: this.authService.generateRefreshToken(1),
-      };
-      res.status(EStatusCode.OK).json(tokens);
-    } else {
-      res.status(EStatusCode.BAD_REQUEST).json();
+      throw new Error(EStatusCode.BAD_REQUEST);
     }
+
+    const user = await this.userRepository.getIdAndPasswordByEmail(email);
+    if (!user) {
+      throw new Error(EStatusCode.NOT_FOUND);
+    }
+
+    if (!(await this.authService.check(password, user.password))) {
+      throw new Error(EStatusCode.UNAUTHORIZED);
+    }
+
+    const tokens = {
+      accessToken: this.authService.generateAccessToken(user.id),
+      refreshToken: this.authService.generateRefreshToken(user.id),
+    };
+    res.status(EStatusCode.OK).json(tokens);
   };
 
   register = async (req: Request, res: Response) => {
-    const { email, password, username } = req.body;
-    if (!email || !password) {
-      res.status(EStatusCode.BAD_REQUEST).json();
-    } else {
-      this.fakeUsers.push({ id: this.fakeUsers.length + 1, email, password, username });
-
-      const tokens = {
-        accessToken: this.authService.generateAccessToken(1),
-        refreshToken: this.authService.generateRefreshToken(1),
-      };
-
-      this.userRepository.create({email, password, username} as NewUser);
-      res.status(EStatusCode.OK).json(tokens);
+    const {email, password, username} = req.body;
+    if (
+      !this.authValidators.isEmailValid(email) ||
+      !this.authValidators.isPasswordValid(password)
+    ) {
+      throw new Error(EStatusCode.BAD_REQUEST);
     }
+
+    if (await this.userRepository.getByEmail(email)) {
+      throw new Error(EStatusCode.CONFLICT);
+    }
+
+    const hashedPassword = await this.authService.hashPassword(password);
+
+    const user = await this.userRepository.create({
+      email,
+      password: hashedPassword,
+      username,
+    });
+
+    if (!user) {
+      throw new Error(EStatusCode.INTERNAL_SERVER_ERROR);
+    }
+
+    const tokens = {
+      accessToken: this.authService.generateAccessToken(user?.id),
+      refreshToken: this.authService.generateRefreshToken(user?.id),
+    };
+
+    res.status(EStatusCode.OK).json(tokens);
   };
 
   token = async (req: Request, res: Response) => {

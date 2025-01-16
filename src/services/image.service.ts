@@ -1,9 +1,9 @@
+import {ReadStream} from 'node:fs';
 import {EImageExtension, Extension} from '../models/enums/extension';
 import {EFileType} from '../models/enums/fileType';
+import FileRepository from '../repositories/file.repository';
 import UploadRepository, {IDirectory} from '../repositories/upload.repository';
 import ConvertService, {IConvertImageOutput} from './convert.service';
-import {ReadStream} from 'node:fs';
-import FileRepository from '../repositories/file.repository';
 
 export default class ImageService {
   private readonly sizes = [200, 400, 800];
@@ -49,11 +49,7 @@ export default class ImageService {
     return uuid;
   };
 
-  read(
-    name: string,
-    size: string,
-    extension: Extension
-  ): ReadStream | undefined {
+  read(name: string, size: string, extension: Extension): ReadStream {
     const directory: IDirectory = {
       name: name,
       type: EFileType.IMAGE,

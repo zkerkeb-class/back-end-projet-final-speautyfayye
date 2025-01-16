@@ -1,10 +1,10 @@
 import fs, {ReadStream} from 'node:fs';
-import {Readable} from 'node:stream';
 import path from 'node:path';
+import {Readable} from 'node:stream';
 import {Extension} from '../models/enums/extension';
 import {EFileType} from '../models/enums/fileType';
-import LogRepository from './log.repository';
 import {EStatusCode} from '../models/enums/statusCode';
+import LogRepository from './log.repository';
 
 export interface IDirectory {
   name: string;
@@ -49,17 +49,13 @@ export default class UploadRepository {
     await Promise.all(data.map(d => this.upload(d, directoryPath)));
   }
 
-  read(file: IFile, directoryPath: string): ReadStream | undefined {
+  read(file: IFile, directoryPath: string): ReadStream {
     file.suffixes?.unshift(file.name);
     const filename = (file.suffixes?.join('-') ?? file.name).concat(
       '.',
       file.extension
     );
-    const filePath = `${path.join(directoryPath, filename)}`;
-    if (fs.existsSync(filePath)) {
-      return fs.createReadStream(`${path.join(directoryPath, filename)}`);
-    }
-    return;
+    return fs.createReadStream(`${path.join(directoryPath, filename)}`);
   }
 
   readPartial(
