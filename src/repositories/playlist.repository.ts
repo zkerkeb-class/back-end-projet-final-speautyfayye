@@ -1,6 +1,6 @@
 import {jsonArrayFrom} from 'kysely/helpers/postgres';
 import {db} from '../config/db/db';
-import {IPlaylist, IPlaylistExt, NewPlaylist} from '../models/playlist';
+import {IPlaylist, IPlaylistExt, NewPlaylist, PlaylistUpdate} from '../models/playlist';
 
 export default class PlaylistRepository {
   create = async (playlist: NewPlaylist): Promise<IPlaylist> => {
@@ -39,5 +39,18 @@ export default class PlaylistRepository {
 
   getAll = async (): Promise<IPlaylist[]> => {
     return db.selectFrom('playlist').selectAll().execute();
+  };
+
+  deleteById = async (id: number): Promise<void> => {
+    await db.deleteFrom('playlist').where('id', '=', id).execute();
+  };
+
+  updateById = async (id: number, playlist: PlaylistUpdate): Promise<IPlaylist> => {
+    return await db
+      .updateTable('playlist')
+      .set(playlist)
+      .where('id', '=', id)
+      .returningAll()
+      .executeTakeFirstOrThrow();
   };
 }

@@ -1,6 +1,6 @@
 import {Request, Response} from 'express';
 import {ApiResponse} from '../models/other/apiResponse';
-import {IPlaylist, IPlaylistExt, NewPlaylist} from '../models/playlist';
+import {IPlaylist, IPlaylistExt, NewPlaylist, PlaylistUpdate} from '../models/playlist';
 import {EStatusCode} from '../models/enums/statusCode';
 import PlaylistRepository from '../repositories/playlist.repository';
 import {Error} from '../models/error';
@@ -34,4 +34,26 @@ export default class PlaylistController {
     const apiResponse = new ApiResponse<IPlaylist[]>({data: playlists});
     res.status(EStatusCode.OK).send(apiResponse);
   };
+
+  delete = async (req: Request, res: Response) => {
+    const playlistId = Number(req.params.id);
+    if (!playlistId) {
+      throw new Error(EStatusCode.NOT_FOUND);
+    }
+    await this.playlistRepository.deleteById(playlistId);
+    res.status(EStatusCode.OK).send();
+  }
+
+  update = async (req: Request, res: Response) => {
+    const playlistId = Number(req.params.id);
+    if (!playlistId) {
+      throw new Error(EStatusCode.NOT_FOUND);
+    }
+    const playlist = await this.playlistRepository.updateById(
+      playlistId,
+      req.body as PlaylistUpdate
+    );
+    const apiResponse = new ApiResponse<IPlaylist>({data: playlist});
+    res.status(EStatusCode.OK).send(apiResponse);
+  }
 }
