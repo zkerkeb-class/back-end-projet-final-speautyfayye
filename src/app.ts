@@ -98,7 +98,12 @@ const cacheMiddleware = new CacheMiddleware();
 
 //#region Controllers
 const authController = new AuthController(authService, userRepository);
-const fileController = new ImageController(uploadService);
+const fileController = new ImageController(
+  uploadService,
+  trackRepository,
+  albumRepository,
+  artistRepository
+);
 const audioController = new AudioController(audioService, trackRepository);
 const errorController = new ErrorController(logRepository);
 const userController = new UserController(playlistRepository, userRepository);

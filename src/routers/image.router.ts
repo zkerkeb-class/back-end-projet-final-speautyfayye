@@ -27,7 +27,7 @@ export default class ImageRouter {
 
   private createRoutes() {
     this.router
-      .route('/upload')
+      .route('/upload/:entityTypeId/:entityId')
       .post(this.multer.array('files'), this.imageController.upload);
 
     this.router
