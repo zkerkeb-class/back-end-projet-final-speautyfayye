@@ -13,14 +13,14 @@ export default class UserRepository {
   getById = async (id: number): Promise<IUser | undefined> => {
     return await db
       .selectFrom('user')
-      .select(['id', 'username', 'email'])
+      .select(['id', 'email'])
       .where('user.id', '=', id)
       .executeTakeFirst();
   };
   getByEmail = async (email: string): Promise<IUser | undefined> => {
     return await db
       .selectFrom('user')
-      .select(['id', 'username', 'email'])
+      .select(['id', 'email'])
       .where('user.email', '=', email)
       .executeTakeFirst();
   };
@@ -34,9 +34,6 @@ export default class UserRepository {
       .executeTakeFirst();
   };
   getAllUsers = async (): Promise<IUser[] | undefined> => {
-    return await db
-      .selectFrom('user')
-      .select(['id', 'username', 'email'])
-      .execute();
+    return await db.selectFrom('user').select(['id', 'email']).execute();
   };
 }

@@ -1,21 +1,21 @@
+import {faker} from '@faker-js/faker';
 import {Kysely, PostgresDialect} from 'kysely';
+import {randomInt, randomUUID} from 'node:crypto';
+import fs from 'node:fs';
+import path from 'node:path';
+import {Pool} from 'pg';
+import {DB_HOST, DB_NAME, DB_PORT, DB_PWD, DB_USER} from '../config/env';
 import {AlbumTable} from '../models/album';
 import {ArtistTable} from '../models/artist';
 import {ArtistAlbumTable} from '../models/artist_album';
 import {CategoryTable} from '../models/category';
+import {EEntityType} from '../models/enums/entityType';
+import {EFileType} from '../models/enums/fileType';
 import {FileTable} from '../models/file';
 import {PlaylistTable} from '../models/playlist';
 import {PlaylistTrackTable} from '../models/playlist_track';
 import {TrackTable} from '../models/track';
 import {UserTable} from '../models/user';
-import {Pool} from 'pg';
-import {DB_HOST, DB_NAME, DB_PORT, DB_PWD, DB_USER} from '../config/env';
-import fs from 'node:fs';
-import {faker} from '@faker-js/faker';
-import {randomInt, randomUUID} from 'node:crypto';
-import path from 'node:path';
-import {EFileType} from '../models/enums/fileType';
-import {EEntityType} from '../models/enums/entityType';
 const m = import('music-metadata');
 
 interface Database {
@@ -298,7 +298,6 @@ const createRandomUsers = async (
       .values({
         email: faker.internet.email(),
         password: faker.internet.password(),
-        username: faker.internet.username(),
       })
       .returningAll()
       .executeTakeFirstOrThrow();

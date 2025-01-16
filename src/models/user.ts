@@ -3,7 +3,6 @@ import {IPlaylist} from './playlist';
 
 export interface UserTable {
   id: Generated<number>;
-  username: string;
   password: string;
   email: string;
 }
@@ -15,12 +14,10 @@ export type IUser = Omit<UserWithPassword, 'password'>;
 
 export class User implements IUser {
   id: number;
-  username: string;
   email: string;
 
   constructor(data: IUser) {
     this.id = data.id;
-    this.username = data.username;
     this.email = data.email;
   }
 }

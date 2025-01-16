@@ -1,58 +1,59 @@
-import express, {Express} from 'express';
-import cors from 'cors';
-import cookieParser from 'cookie-parser';
-import RateLimiter from './config/rateLimit';
-import helmet from 'helmet';
 import compression from 'compression';
+import cookieParser from 'cookie-parser';
+import cors from 'cors';
+import express, {Express} from 'express';
+import helmet from 'helmet';
+import RateLimiter from './config/rateLimit';
 
 import UploadRepository from './repositories/upload.repository';
 
 // import MeasureRequestTime from './middleware/request-timer.middleware';
 
+import ArtistService from './services/artist.service';
+import AudioService from './services/audio.service';
 import ConvertService from './services/convert.service';
 import ImageService from './services/image.service';
-import AudioService from './services/audio.service';
-import ArtistService from './services/artist.service';
 
-import ImageController from './controllers/image.controller';
-import ErrorController from './controllers/error.controller';
 import AudioController from './controllers/audio.controller';
+import ErrorController from './controllers/error.controller';
+import ImageController from './controllers/image.controller';
 
-import ImageRouter from './routers/image.router';
-import AudioRouter from './routers/audio.router';
-import CacheMiddleware from './middleware/cache.middleware';
-import CorsMiddleware from './middleware/cors.middleware';
-import AuthService from './services/auth.service';
-import AuthRouter from './routers/auth.router';
 import AuthController from './controllers/auth.controller';
 import AuthMiddleware from './middleware/auth.middleware';
+import CacheMiddleware from './middleware/cache.middleware';
+import CorsMiddleware from './middleware/cors.middleware';
 import LogRepository from './repositories/log.repository';
+import AudioRouter from './routers/audio.router';
+import AuthRouter from './routers/auth.router';
+import ImageRouter from './routers/image.router';
+import AuthService from './services/auth.service';
 
 import swaggerUi from 'swagger-ui-express';
-import swaggerOutput from './swagger_output.json';
 import {migrateToLatest} from './config/db/db';
-import UserRouter from './routers/user.router';
-import UserController from './controllers/user.controller';
-import PlaylistController from './controllers/playlist.controller';
-import PlaylistRouter from './routers/playlist.router';
-import TrackRouter from './routers/track.router';
-import TrackController from './controllers/track.controller';
-import TrackRepository from './repositories/track.repository';
-import AlbumRouter from './routers/album.router';
 import AlbumController from './controllers/album.controller';
-import AlbumRepository from './repositories/album.repository';
-import CategoryRepository from './repositories/category.repository';
-import CategoryController from './controllers/category.controller';
-import CategoryRouter from './routers/category.router';
-import FileRepository from './repositories/file.repository';
-import ArtistRouter from './routers/artist.router';
 import ArtistController from './controllers/artist.controller';
-import PlaylistRepository from './repositories/playlist.repository';
-import UserRepository from './repositories/user.repository';
-import ArtistRepository from './repositories/artist.repository';
-import SearchRouter from './routers/search.router';
+import CategoryController from './controllers/category.controller';
+import PlaylistController from './controllers/playlist.controller';
 import SearchController from './controllers/search.controller';
+import TrackController from './controllers/track.controller';
+import UserController from './controllers/user.controller';
+import AlbumRepository from './repositories/album.repository';
+import ArtistRepository from './repositories/artist.repository';
+import CategoryRepository from './repositories/category.repository';
+import FileRepository from './repositories/file.repository';
+import PlaylistRepository from './repositories/playlist.repository';
 import SearchRepository from './repositories/search.repository';
+import TrackRepository from './repositories/track.repository';
+import UserRepository from './repositories/user.repository';
+import AlbumRouter from './routers/album.router';
+import ArtistRouter from './routers/artist.router';
+import CategoryRouter from './routers/category.router';
+import PlaylistRouter from './routers/playlist.router';
+import SearchRouter from './routers/search.router';
+import TrackRouter from './routers/track.router';
+import UserRouter from './routers/user.router';
+import swaggerOutput from './swagger_output.json';
+import AuthValidators from './validators/auth.validators';
 
 const limiter = new RateLimiter();
 const corsMiddleware = new CorsMiddleware();
@@ -99,13 +100,21 @@ const artistService = new ArtistService();
 
 //#endregion
 
+//#region Validators
+const authValidators = new AuthValidators();
+//#endregion
+
 //#region Middlewares
 const authMiddleware = new AuthMiddleware(authService);
 const cacheMiddleware = new CacheMiddleware();
 //#endregion
 
 //#region Controllers
-const authController = new AuthController(authService, userRepository);
+const authController = new AuthController(
+  authService,
+  userRepository,
+  authValidators
+);
 const fileController = new ImageController(
   uploadService,
   trackRepository,

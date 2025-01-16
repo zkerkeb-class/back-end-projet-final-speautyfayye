@@ -38,7 +38,7 @@ export default class AuthController {
   };
 
   register = async (req: Request, res: Response) => {
-    const {email, password, username} = req.body;
+    const {email, password} = req.body;
     if (
       !this.authValidators.isEmailValid(email) ||
       !this.authValidators.isPasswordValid(password)
@@ -55,7 +55,6 @@ export default class AuthController {
     const user = await this.userRepository.create({
       email,
       password: hashedPassword,
-      username,
     });
 
     if (!user) {
