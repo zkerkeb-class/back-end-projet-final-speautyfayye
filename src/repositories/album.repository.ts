@@ -1,39 +1,40 @@
 import {jsonArrayFrom, jsonObjectFrom} from 'kysely/helpers/postgres';
 import {db} from '../config/db/db';
-import {
-  AlbumExt,
-  IAlbum,
-  IAlbumExt,
-  NewAlbum,
-  AlbumUpdate,
-} from '../models/album';
+import {AlbumUpdate, IAlbum, IAlbumExt, NewAlbum} from '../models/album';
 import {EEntityType} from '../models/enums/entityType';
 import {EFileType} from '../models/enums/fileType';
+import {EStatusCode} from '../models/enums/statusCode';
+import {Error} from '../models/error';
 
 export default class AlbumRepository {
   create = async (album: NewAlbum): Promise<IAlbum> => {
-    const newAlbum = await db.transaction().execute(async trx => {
-      const a = await trx
-        .insertInto('album')
-        .values(album)
-        .returningAll()
-        .executeTakeFirstOrThrow();
+    try {
+      return await db.transaction().execute(async trx => {
+        const a = await trx
+          .insertInto('album')
+          .values(album)
+          .returningAll()
+          .executeTakeFirstOrThrow();
 
-      if (album.picture) {
-        await trx
-          .updateTable('file')
-          .set({
-            entityId: a.id,
-            entityTypeId: EEntityType.ALBUM,
-          })
-          .where('file.id', '=', album.picture)
-          .where('file.fileType', '=', EFileType.IMAGE)
-          .execute();
-      }
-      return a;
-    });
-
-    return newAlbum;
+        if (album.picture) {
+          await trx
+            .updateTable('file')
+            .set({
+              entityId: a.id,
+              entityTypeId: EEntityType.ALBUM,
+            })
+            .where('file.id', '=', album.picture)
+            .where('file.fileType', '=', EFileType.IMAGE)
+            .execute();
+        }
+        return a;
+      });
+    } catch (error) {
+      const hasMessage = 'message' in (error as any);
+      throw new Error(EStatusCode.INTERNAL_SERVER_ERROR, {
+        message: `Error while creating album: ${hasMessage ? (error as any).message : ''}`,
+      });
+    }
   };
 
   getById = async (id: number): Promise<IAlbumExt | undefined> => {
@@ -85,15 +86,29 @@ export default class AlbumRepository {
   };
 
   deleteById = async (id: number): Promise<void> => {
-    await db.deleteFrom('album').where('id', '=', id).execute();
+    try {
+      await db.deleteFrom('album').where('id', '=', id).execute();
+    } catch (error) {
+      const hasMessage = 'message' in (error as any);
+      throw new Error(EStatusCode.INTERNAL_SERVER_ERROR, {
+        message: `Error while deleting album: ${hasMessage ? (error as any).message : ''}`,
+      });
+    }
   };
 
   updateById = async (id: number, album: AlbumUpdate): Promise<AlbumUpdate> => {
-    return await db
-      .updateTable('album')
-      .set(album)
-      .where('id', '=', id)
-      .returningAll()
-      .executeTakeFirstOrThrow();
+    try {
+      return await db
+        .updateTable('album')
+        .set(album)
+        .where('id', '=', id)
+        .returningAll()
+        .executeTakeFirstOrThrow();
+    } catch (error) {
+      const hasMessage = 'message' in (error as any);
+      throw new Error(EStatusCode.INTERNAL_SERVER_ERROR, {
+        message: `Error while deleting album: ${hasMessage ? (error as any).message : ''}`,
+      });
+    }
   };
 }

@@ -18,7 +18,10 @@ export default class AuthController {
       !this.authValidators.isEmailValid(email) ||
       !this.authValidators.isPasswordValid(password)
     ) {
-      throw new Error(EStatusCode.BAD_REQUEST);
+      throw new Error(EStatusCode.BAD_REQUEST, {
+        logLevel: 'warn',
+        message: 'Invalid email or password',
+      });
     }
 
     const user = await this.userRepository.getIdAndPasswordByEmail(email);
@@ -43,7 +46,10 @@ export default class AuthController {
       !this.authValidators.isEmailValid(email) ||
       !this.authValidators.isPasswordValid(password)
     ) {
-      throw new Error(EStatusCode.BAD_REQUEST);
+      throw new Error(EStatusCode.BAD_REQUEST, {
+        logLevel: 'warn',
+        message: 'Invalid email or password',
+      });
     }
 
     if (await this.userRepository.getByEmail(email)) {

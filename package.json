@@ -37,6 +37,7 @@
     "swagger-autogen": "^2.23.7",
     "swagger-ui-express": "^5.0.1",
     "uuid": "^10.0.0",
+    "winston": "^3.17.0",
     "zod": "^3.24.1"
   },
   "devDependencies": {

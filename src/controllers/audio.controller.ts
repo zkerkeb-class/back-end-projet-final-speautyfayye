@@ -1,9 +1,9 @@
 import {Request, Response} from 'express';
 import {EStatusCode} from '../models/enums/statusCode';
-import AudioService from '../services/audio.service';
 import {Error} from '../models/error';
 import {ApiResponse} from '../models/other/apiResponse';
 import TrackRepository from '../repositories/track.repository';
+import AudioService from '../services/audio.service';
 
 export default class AudioController {
   constructor(
@@ -13,9 +13,7 @@ export default class AudioController {
 
   upload = async (req: Request, res: Response) => {
     if (!req.files?.length) {
-      throw new Error(EStatusCode.BAD_REQUEST, {
-        message: 'No file found',
-      });
+      throw new Error(EStatusCode.BAD_REQUEST);
     }
 
     const ids = await Promise.all(
@@ -39,6 +37,7 @@ export default class AudioController {
     const track = await this.trackRepository.getById(trackId);
     if (!track) {
       throw new Error(EStatusCode.NOT_FOUND, {
+        logLevel: 'warn',
         message: `Track with id ${trackId} not found`,
       });
     }
@@ -70,6 +69,7 @@ export default class AudioController {
       }
     } catch (error) {
       throw new Error(EStatusCode.INTERNAL_SERVER_ERROR, {
+        logLevel: 'error',
         message: `error while reading file ${trackId}`,
       });
     }

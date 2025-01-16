@@ -3,7 +3,6 @@ import path from 'node:path';
 import {Readable} from 'node:stream';
 import {Extension} from '../models/enums/extension';
 import {EFileType} from '../models/enums/fileType';
-import {EStatusCode} from '../models/enums/statusCode';
 import LogRepository from './log.repository';
 
 export interface IDirectory {
@@ -42,7 +41,7 @@ export default class UploadRepository {
       writableStream.on('finish', () => resolve());
       writableStream.on('error', error => reject(error));
     });
-    this.logRepository.insert(EStatusCode.CREATED, `inserted ${filename}`);
+    this.logRepository.logger.info(`inserted ${filename}`);
   }
 
   async uploadMultiple(data: IUpload[], directoryPath: string) {

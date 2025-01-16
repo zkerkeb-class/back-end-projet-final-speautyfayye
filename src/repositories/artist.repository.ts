@@ -1,7 +1,7 @@
 import {db} from '../config/db/db';
+import {ArtistUpdate, IArtist, NewArtist} from '../models/artist';
 import {EStatusCode} from '../models/enums/statusCode';
 import {Error} from '../models/error';
-import {IArtist, NewArtist, ArtistUpdate} from '../models/artist';
 
 export default class ArtistRepository {
   async getAllArtists(option?: {category_id?: number}): Promise<IArtist[]> {
@@ -28,24 +28,16 @@ export default class ArtistRepository {
   }
 
   async getAristByName(name: string) {
-    try {
-      const artist = await db
-        .selectFrom('artist')
-        .where('name', '=', name)
-        .selectAll()
-        .executeTakeFirst();
-
-      if (!artist) {
-        return new Error(EStatusCode.NOT_FOUND);
-      }
-    } catch (error) {
-      throw new Error(EStatusCode.INTERNAL_SERVER_ERROR);
-    }
+    return await db
+      .selectFrom('artist')
+      .where('name', '=', name)
+      .selectAll()
+      .executeTakeFirst();
   }
 
   async createArtist(data: NewArtist) {
     try {
-      const artist = await db
+      return await db
         .insertInto('artist')
         .values({
           name: data.name,
@@ -53,21 +45,19 @@ export default class ArtistRepository {
           bio: data.bio,
           picture: data.picture,
         })
+        .returningAll()
         .execute();
-
-      if (!artist) {
-        return new Error(EStatusCode.BAD_REQUEST);
-      }
-
-      return artist;
     } catch (error) {
-      throw new Error(EStatusCode.INTERNAL_SERVER_ERROR);
+      const hasMessage = 'message' in (error as any);
+      throw new Error(EStatusCode.INTERNAL_SERVER_ERROR, {
+        message: `Error while creating artist: ${hasMessage ? (error as any).message : ''}`,
+      });
     }
   }
 
   async updateById(id: number, data: ArtistUpdate) {
     try {
-      const artist = await db
+      return await db
         .updateTable('artist')
         .set({
           name: data.name,
@@ -77,31 +67,22 @@ export default class ArtistRepository {
         })
         .where('id', '=', id)
         .execute();
-
-      if (!artist) {
-        return new Error(EStatusCode.BAD_REQUEST);
-      }
-
-      return artist;
     } catch (error) {
-      throw new Error(EStatusCode.INTERNAL_SERVER_ERROR);
+      const hasMessage = 'message' in (error as any);
+      throw new Error(EStatusCode.INTERNAL_SERVER_ERROR, {
+        message: `Error while updating artist: ${hasMessage ? (error as any).message : ''}`,
+      });
     }
   }
 
   async deleteArtist(id: number) {
     try {
-      const artist = await db
-        .deleteFrom('artist')
-        .where('id', '=', id)
-        .execute();
-
-      if (!artist) {
-        return new Error(EStatusCode.BAD_REQUEST);
-      }
-
-      return artist;
+      return await db.deleteFrom('artist').where('id', '=', id).execute();
     } catch (error) {
-      throw new Error(EStatusCode.INTERNAL_SERVER_ERROR);
+      const hasMessage = 'message' in (error as any);
+      throw new Error(EStatusCode.INTERNAL_SERVER_ERROR, {
+        message: `Error while deleting artist: ${hasMessage ? (error as any).message : ''}`,
+      });
     }
   }
 }
