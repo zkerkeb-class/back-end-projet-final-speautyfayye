@@ -15,9 +15,9 @@ export default class AuthService {
   async check(password: string, cryptedPassword: string): Promise<boolean> {
     return await compare(password, cryptedPassword);
   }
-  generateAccessToken(userId: number) {
+  generateAccessToken(userId: number, role: string) {
     try {
-      return sign({_id: userId}, accessSecret, {expiresIn: '2d'});
+      return sign({_id: userId, role}, accessSecret, {expiresIn: '2d'});
     } catch (error) {
       throw new Error(EStatusCode.INTERNAL_SERVER_ERROR);
     }
@@ -25,17 +25,16 @@ export default class AuthService {
 
   generateRefreshToken(userId: number) {
     try {
-      return sign({_id: userId}, refreshSecret, {expiresIn: '7d'});
+      return sign({id: userId}, refreshSecret, {expiresIn: '7d'});
     } catch (error) {
       throw new Error(EStatusCode.INTERNAL_SERVER_ERROR);
     }
   }
 
-  async verifyAccessToken(
-    token: string
-  ): Promise<string | JwtPayload | undefined> {
+  async verifyAccessToken(token: string): Promise<JwtPayload> {
     try {
-      return verify(token, accessSecret);
+      const payload = verify(token, accessSecret) as JwtPayload;
+      return {id: payload.id, role: payload.role};
     } catch (error) {
       throw new Error(EStatusCode.UNAUTHORIZED);
     }

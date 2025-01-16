@@ -292,12 +292,22 @@ const createRandomUsers = async (
   number: number,
   fileLength: number
 ) => {
+  await db
+    .insertInto('user')
+    .values({
+      email: 'admin@spotify.com',
+      password: '$2a$10$zIRYvamAJW7c60cUFHnSI.JPw.hu045Uw4DQEajMxtCpU2JSErkB6',
+      role: 'admin',
+    })
+    .executeTakeFirstOrThrow();
+
   for (let i = 0; i < number; i++) {
     const user = await db
       .insertInto('user')
       .values({
         email: faker.internet.email(),
         password: faker.internet.password(),
+        role: 'user',
       })
       .returningAll()
       .executeTakeFirstOrThrow();

@@ -123,7 +123,12 @@ const fileController = new ImageController(
 );
 const audioController = new AudioController(audioService, trackRepository);
 const errorController = new ErrorController(logRepository);
-const userController = new UserController(playlistRepository, userRepository);
+const userController = new UserController(
+  playlistRepository,
+  userRepository,
+  authService,
+  authValidators
+);
 const playlistController = new PlaylistController(playlistRepository);
 const trackController = new TrackController(trackRepository);
 const albumController = new AlbumController(albumRepository);

@@ -31,7 +31,7 @@ export default class AuthController {
     }
 
     const tokens = {
-      accessToken: this.authService.generateAccessToken(user.id),
+      accessToken: this.authService.generateAccessToken(user.id, user.role),
       refreshToken: this.authService.generateRefreshToken(user.id),
     };
     res.status(EStatusCode.OK).json(tokens);
@@ -55,6 +55,7 @@ export default class AuthController {
     const user = await this.userRepository.create({
       email,
       password: hashedPassword,
+      role: 'user',
     });
 
     if (!user) {
@@ -62,18 +63,18 @@ export default class AuthController {
     }
 
     const tokens = {
-      accessToken: this.authService.generateAccessToken(user?.id),
-      refreshToken: this.authService.generateRefreshToken(user?.id),
+      accessToken: this.authService.generateAccessToken(user.id, user.role),
+      refreshToken: this.authService.generateRefreshToken(user.id),
     };
 
     res.status(EStatusCode.OK).json(tokens);
   };
 
-  token = async (req: Request, res: Response) => {
-    const tokens = {
-      accessToken: this.authService.generateAccessToken(1),
-      refreshToken: this.authService.generateRefreshToken(1),
-    };
-    res.status(EStatusCode.OK).json(tokens);
-  };
+  // token = async (req: Request, res: Response) => {
+  //   const tokens = {
+  //     accessToken: this.authService.generateAccessToken(1),
+  //     refreshToken: this.authService.generateRefreshToken(1),
+  //   };
+  //   res.status(EStatusCode.OK).json(tokens);
+  // };
 }

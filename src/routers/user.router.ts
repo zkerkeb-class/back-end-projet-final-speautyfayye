@@ -13,5 +13,6 @@ export default class UserRouter {
     this.router.route('/').get(this.userController.getAll);
     this.router.route('/playlists/:id').get(this.userController.getPlaylists);
     this.router.route('/:id').get(this.userController.getUser);
+    this.router.route('/').put(this.userController.updateUser);
   }
 }

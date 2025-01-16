@@ -5,6 +5,7 @@ export interface UserTable {
   id: Generated<number>;
   password: string;
   email: string;
+  role: string;
 }
 
 export type UserWithPassword = Selectable<UserTable>;
@@ -15,10 +16,12 @@ export type IUser = Omit<UserWithPassword, 'password'>;
 export class User implements IUser {
   id: number;
   email: string;
+  role: string;
 
   constructor(data: IUser) {
     this.id = data.id;
     this.email = data.email;
+    this.role = data.role;
   }
 }
 

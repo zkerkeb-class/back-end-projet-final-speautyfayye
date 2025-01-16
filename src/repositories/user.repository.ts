@@ -6,34 +6,48 @@ export default class UserRepository {
     return await db
       .insertInto('user')
       .values(user)
-      .returningAll()
+      .returning(['id', 'email', 'role'])
       .executeTakeFirstOrThrow();
   };
 
   getById = async (id: number): Promise<IUser | undefined> => {
     return await db
       .selectFrom('user')
-      .select(['id', 'email'])
+      .select(['id', 'email', 'role'])
       .where('user.id', '=', id)
       .executeTakeFirst();
   };
   getByEmail = async (email: string): Promise<IUser | undefined> => {
     return await db
       .selectFrom('user')
-      .select(['id', 'email'])
+      .select(['id', 'email', 'role'])
       .where('user.email', '=', email)
       .executeTakeFirst();
   };
   getIdAndPasswordByEmail = async (
     email: string
-  ): Promise<{password: string; id: number} | undefined> => {
+  ): Promise<{password: string; id: number; role: string} | undefined> => {
     return await db
       .selectFrom('user')
-      .select(['id', 'password'])
+      .select(['id', 'password', 'role'])
       .where('user.email', '=', email)
       .executeTakeFirst();
   };
   getAllUsers = async (): Promise<IUser[] | undefined> => {
-    return await db.selectFrom('user').select(['id', 'email']).execute();
+    return await db
+      .selectFrom('user')
+      .select(['id', 'email', 'role'])
+      .execute();
+  };
+  update = async (
+    id: number,
+    user: Partial<IUser>
+  ): Promise<IUser | undefined> => {
+    return await db
+      .updateTable('user')
+      .set(user)
+      .where('id', '=', id)
+      .returning(['id', 'email', 'role'])
+      .executeTakeFirst();
   };
 }

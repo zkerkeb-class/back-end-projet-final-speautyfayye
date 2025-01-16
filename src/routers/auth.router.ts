@@ -1,13 +1,13 @@
-import express, { Router } from 'express';
-import AuthController from '../controllers/auth.controller';
+import express, {Router} from 'express';
 import RateLimiter from '../config/rateLimit';
+import AuthController from '../controllers/auth.controller';
 
 export default class AuthRouter {
   router: Router;
 
   constructor(
     private readonly limiter: RateLimiter,
-    private readonly authController: AuthController,
+    private readonly authController: AuthController
   ) {
     this.router = express.Router();
     this.createRoutes();
@@ -22,8 +22,8 @@ export default class AuthRouter {
       .route('/register')
       .post(this.limiter.auth, this.authController.register);
 
-    this.router
-      .route('/token')
-      .get(this.limiter.auth, this.authController.token);
+    // this.router
+    //   .route('/token')
+    //   .get(this.limiter.auth, this.authController.token);
   }
 }
