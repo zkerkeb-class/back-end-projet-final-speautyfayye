@@ -1,6 +1,6 @@
 import {jsonObjectFrom} from 'kysely/helpers/postgres';
 import {db} from '../config/db/db';
-import {ITrack, ITrackExt, NewTrack} from '../models/track';
+import {ITrack, ITrackExt, NewTrack, TrackUpdate} from '../models/track';
 import {EEntityType} from '../models/enums/entityType';
 import {EFileType} from '../models/enums/fileType';
 
@@ -137,4 +137,16 @@ export default class TrackRepository {
     return await query.execute();
 
   };
+
+  deleteById = async (id: number): Promise<void> => {
+    await db.deleteFrom('track').where('id', '=', id).execute();
+  }
+
+  updateById = async (id: number, track: TrackUpdate): Promise<TrackUpdate> => {
+    return await db
+      .updateTable('track')
+      .set(track).where('id', '=', id)
+      .returningAll()
+      .executeTakeFirstOrThrow();
+  }
 }

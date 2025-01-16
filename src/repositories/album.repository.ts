@@ -1,6 +1,6 @@
 import {jsonArrayFrom, jsonObjectFrom} from 'kysely/helpers/postgres';
 import {db} from '../config/db/db';
-import {AlbumExt, IAlbum, IAlbumExt, NewAlbum} from '../models/album';
+import {AlbumExt, IAlbum, IAlbumExt, NewAlbum, AlbumUpdate} from '../models/album';
 import {EEntityType} from '../models/enums/entityType';
 import {EFileType} from '../models/enums/fileType';
 
@@ -77,4 +77,17 @@ export default class AlbumRepository {
 
     return await query.execute();
   };
+
+  deleteById = async(id: number): Promise<void> => {
+    await db.deleteFrom('album').where('id', '=', id).execute();
+  }
+
+  updateById = async(id: number, album: AlbumUpdate): Promise<AlbumUpdate> => {
+    return await db
+      .updateTable('album')
+      .set(album)
+      .where('id', '=', id)
+      .returningAll()
+      .executeTakeFirstOrThrow();
+  }
 }

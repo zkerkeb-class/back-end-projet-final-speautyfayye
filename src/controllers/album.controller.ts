@@ -1,7 +1,7 @@
 import {Request, Response} from 'express';
 import {ApiResponse} from '../models/other/apiResponse';
 import {EStatusCode} from '../models/enums/statusCode';
-import {IAlbum, NewAlbum, AlbumExt} from '../models/album';
+import {IAlbum, NewAlbum, AlbumExt, AlbumUpdate} from '../models/album';
 import AlbumRepository from '../repositories/album.repository';
 import { read } from 'fs';
 
@@ -53,5 +53,27 @@ export default class AlbumController {
 
       const apiResponse = new ApiResponse<AlbumExt[]>({ data: albums });
       res.status(EStatusCode.OK).send(apiResponse);
-};
+  };
+
+  deleteById = async (req: Request, res: Response) => {
+    const albumId = Number(req.params.id);
+    if (!albumId) {
+      res.status(EStatusCode.NOT_FOUND).send();
+    }
+    await this.albumRepository.deleteById(albumId);
+    res.status(EStatusCode.OK).send();
+  }
+
+  updateById = async (req: Request, res: Response) => {
+    const albumId = Number(req.params.id);
+    if (!albumId) {
+      res.status(EStatusCode.NOT_FOUND).send();
+    }
+    const album = await this.albumRepository.updateById(
+      albumId,
+      req.body as AlbumUpdate
+    );
+    const apiResponse = new ApiResponse<IAlbum>({data: album});
+    res.status(EStatusCode.OK).send(apiResponse);
+  }
 }
