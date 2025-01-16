@@ -19,20 +19,12 @@ export default class ArtistRepository {
     return await query.execute();
   }
 
-  async getArtistById(id: number) {
-    try {
-      const artist = await db
-        .selectFrom('artist')
-        .where('id', '=', id)
-        .selectAll()
-        .executeTakeFirst();
-
-      if (!artist) {
-        return new Error(EStatusCode.NOT_FOUND);
-      }
-    } catch (error) {
-      throw new Error(EStatusCode.INTERNAL_SERVER_ERROR);
-    }
+  async getArtistById(id: number): Promise<IArtist | undefined> {
+    return await db
+      .selectFrom('artist')
+      .selectAll()
+      .where('id', '=', id)
+      .executeTakeFirst();
   }
 
   async getAristByName(name: string) {

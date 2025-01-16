@@ -3,6 +3,7 @@ import {ApiResponse} from '../models/other/apiResponse';
 import {EStatusCode} from '../models/enums/statusCode';
 import ArtistRepository from '../repositories/artist.repository';
 import {IArtist} from '../models/artist';
+import {Error} from '../models/error';
 
 export default class ArtistController {
   constructor(private readonly artistRepository: ArtistRepository) {}
@@ -24,7 +25,9 @@ export default class ArtistController {
     const apiResponse = new ApiResponse<IArtist>({data: artist});
 
     if (!artist) {
-      res.status(EStatusCode.NOT_FOUND).send(apiResponse);
+      throw new Error(EStatusCode.NOT_FOUND, {
+        message: 'Artist not found',
+      });
     }
 
     res.status(EStatusCode.OK).send(apiResponse);

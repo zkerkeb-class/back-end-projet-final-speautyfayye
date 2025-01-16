@@ -47,14 +47,20 @@ export default class AudioService {
       type: EFileType.AUDIO,
     };
 
+    const readable = this.uploadRepository.read(
+      {
+        ...directory,
+        extension: EAudioExtension.MP3,
+      },
+      this.uploadRepository.getDirPath(directory)
+    );
+
+    if (!readable) {
+      throw new Error('File not found');
+    }
+
     return {
-      readable: this.uploadRepository.read(
-        {
-          ...directory,
-          extension: EAudioExtension.MP3,
-        },
-        this.uploadRepository.getDirPath(directory)
-      ),
+      readable,
     };
   }
 

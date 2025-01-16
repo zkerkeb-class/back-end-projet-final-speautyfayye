@@ -9,7 +9,7 @@ import TrackRepository from '../repositories/track.repository';
 import AlbumRepository from '../repositories/album.repository';
 import ArtistRepository from '../repositories/artist.repository';
 
-enum IEntityTypeId {
+enum EEntityTypeId {
   track = 1,
   album = 2,
   artist = 3,
@@ -37,7 +37,7 @@ export default class ImageController {
       });
     }
 
-    if (!Object.values(IEntityTypeId).includes(+entityTypeId)) {
+    if (!Object.values(EEntityTypeId).includes(+entityTypeId)) {
       throw new Error(EStatusCode.BAD_REQUEST, {
         message: 'Invalid entity type',
       });
@@ -50,13 +50,13 @@ export default class ImageController {
     );
 
     switch (+entityTypeId) {
-      case IEntityTypeId.track:
+      case EEntityTypeId.track:
         await this.trackRepository.updateById(+entityId, {picture: ids[0]});
         break;
-      case IEntityTypeId.album:
+      case EEntityTypeId.album:
         await this.albumRepository.updateById(+entityId, {picture: ids[0]});
         break;
-      case IEntityTypeId.artist:
+      case EEntityTypeId.artist:
         await this.artistRepository.updateById(+entityId, {picture: ids[0]});
         break;
       default:
@@ -73,6 +73,11 @@ export default class ImageController {
       size,
       ext as EImageExtension
     );
+    if (!readStream) {
+      throw new Error(EStatusCode.NOT_FOUND, {
+        message: 'Image not found',
+      });
+    }
     cache.set(req.originalUrl, readStream);
     readStream.pipe(res);
   };
