@@ -80,6 +80,8 @@ export default class TrackRepository {
     playlistId?: number;
     maxNumberOfPlays?: number;
     minNumberOfPlays?: number;
+    sortBy?: 'duration' | 'title' | 'numberOfPlays';
+    sortOrder?: 'asc' | 'desc';
   }): Promise<ITrack[]> => {
     let query = db.selectFrom('track').selectAll();
 
@@ -117,22 +119,20 @@ export default class TrackRepository {
     }
 
     if (options?.minNumberOfPlays) {
-      query = query.where(
-        'track.number_of_plays',
-        '>=',
-        options.minNumberOfPlays
-      );
+      query = query.where('track.number_of_plays', '>=', options.minNumberOfPlays);
     }
 
     if (options?.maxNumberOfPlays) {
-      query = query.where(
-        'track.number_of_plays',
-        '<=',
-        options.maxNumberOfPlays
-      );
+      query = query.where('track.number_of_plays', '<=', options.maxNumberOfPlays);
     }
-    query = query.orderBy('track.number_of_plays', 'desc');
-    query = query.orderBy('track.title', 'asc');
+
+    if (options?.sortBy === 'duration') {
+      query = query.orderBy('duration', options.sortOrder || 'asc');
+    } else if (options?.sortBy === 'title') {
+      query = query.orderBy('title', options.sortOrder || 'asc');
+    } else if (options?.sortBy === 'numberOfPlays') {
+      query = query.orderBy('number_of_plays', options.sortOrder || 'desc');
+    }
 
     return await query.execute();
   };

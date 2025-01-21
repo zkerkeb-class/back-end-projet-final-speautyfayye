@@ -65,24 +65,55 @@ export default class AlbumRepository {
     artistId?: number;
     category?: number;
     releaseDate?: Date;
+    sortBy?: 'releaseDate' | 'trackCount';
+    sortOrder?: 'asc' | 'desc';
   }): Promise<IAlbum[]> => {
-    let query = db.selectFrom('album').selectAll();
+    if (options?.sortBy === 'trackCount') {
+      let query = db
+        .selectFrom('album')
+        .leftJoin('track', 'track.album_id', 'album.id')
+        .select(['album.id', 'album.title', 'album.releaseDate', 'album.category_id', 'album.picture'])
+        .select(eb => eb.fn.count('track.id').as('trackCount'))
+        .groupBy(['album.id', 'album.title', 'album.releaseDate', 'album.category_id', 'album.picture']);
 
-    if (options?.artistId) {
-      query = query
-        .innerJoin('artist_album', 'artist_album.album_id', 'album.id')
-        .where('artist_album.artist_id', '=', options.artistId);
+      if (options?.artistId) {
+        query = query
+          .innerJoin('artist_album', 'artist_album.album_id', 'album.id')
+          .where('artist_album.artist_id', '=', options.artistId);
+      }
+
+      if (options?.category) {
+        query = query.where('album.category_id', '=', options.category);
+      }
+
+      if (options?.releaseDate) {
+        query = query.where('album.releaseDate', '=', options.releaseDate);
+      }
+
+      return query.orderBy('trackCount', options.sortOrder || 'desc').execute();
+    } else {
+      let query = db.selectFrom('album').selectAll();
+
+      if (options?.artistId) {
+        query = query
+          .innerJoin('artist_album', 'artist_album.album_id', 'album.id')
+          .where('artist_album.artist_id', '=', options.artistId);
+      }
+
+      if (options?.category) {
+        query = query.where('album.category_id', '=', options.category);
+      }
+
+      if (options?.releaseDate) {
+        query = query.where('album.releaseDate', '=', options.releaseDate);
+      }
+
+      if (options?.sortBy === 'releaseDate') {
+        query = query.orderBy('releaseDate', options.sortOrder || 'desc');
+      }
+
+      return query.execute();
     }
-
-    if (options?.category) {
-      query = query.where('album.category_id', '=', options.category);
-    }
-
-    if (options?.releaseDate) {
-      query = query.where('album.releaseDate', '=', options.releaseDate);
-    }
-
-    return await query.execute();
   };
 
   deleteById = async (id: number): Promise<void> => {

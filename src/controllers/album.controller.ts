@@ -28,13 +28,15 @@ export default class AlbumController {
   };
 
   getAllWithFilters = async (req: Request, res: Response) => {
-    const {artistId, category, releaseDate} = req.query;
+    const {artistId, category, releaseDate, sortBy, sortOrder} = req.query;
     const releaseDateParsed = new Date(releaseDate as string);
     // Préparation des options de filtrage
     const filterOptions = {
       artistId: artistId ? Number(artistId) : undefined,
       category: category ? Number(category) : undefined,
       releaseDate: releaseDate ? releaseDateParsed : undefined,
+      sortBy: sortBy ? sortBy as 'releaseDate' | 'trackCount' : undefined,
+      sortOrder: sortOrder ? sortOrder as 'asc' | 'desc' : undefined,
     };
 
     // Validation des filtres numériques
