@@ -5,7 +5,7 @@
   "scripts": {
     "doc": "ts-node src/swagger.ts",
     "build": "npx tsc",
-    "start": "node dist/index.js",
+    "start": "ts-node src/index.ts",
     "dev": "nodemon src/index.ts",
     "prepare": "node .husky/install.mjs",
     "populate": "ts-node src/__populate__/populate.ts",
