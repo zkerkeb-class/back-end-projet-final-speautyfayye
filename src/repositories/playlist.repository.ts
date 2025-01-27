@@ -50,11 +50,12 @@ export default class PlaylistRepository {
                     'artist.id'
                   )
                   .whereRef('artist_album.album_id', '=', 'track.album_id')
-                  .distinct()
               ).as('artist'),
             ])
+            .distinct()
         ).as('tracks'),
       ])
+      .distinct()
       .executeTakeFirst();
   };
 
