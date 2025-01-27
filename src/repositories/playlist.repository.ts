@@ -20,8 +20,7 @@ export default class PlaylistRepository {
     return await db
       .selectFrom('playlist')
       .innerJoin('playlist_track', 'playlist_track.playlist_id', 'playlist.id')
-      .selectAll()
-      .where('playlist.id', '=', id)
+      .selectAll('playlist')
       .select(eb => [
         jsonArrayFrom(
           eb
@@ -52,8 +51,10 @@ export default class PlaylistRepository {
                   .whereRef('artist_album.album_id', '=', 'track.album_id')
               ).as('artist'),
             ])
+            .whereRef('track.id', '=', 'playlist_track.track_id')
         ).as('tracks'),
       ])
+      .where('playlist.id', '=', id)
       .executeTakeFirst();
   };
 
