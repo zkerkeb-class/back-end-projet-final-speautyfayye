@@ -51,7 +51,6 @@ export default class PlaylistRepository {
                   .whereRef('artist_album.album_id', '=', 'track.album_id')
               ).as('artist'),
             ])
-            .whereRef('track.id', '=', 'playlist_track.track_id')
         ).as('tracks'),
       ])
       .where('playlist.id', '=', id)
