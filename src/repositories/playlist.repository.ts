@@ -50,7 +50,7 @@ export default class PlaylistRepository {
                     'artist.id'
                   )
                   .whereRef('artist_album.album_id', '=', 'track.album_id')
-                  .groupBy('track.id')
+                  .distinct()
               ).as('artist'),
             ])
         ).as('tracks'),
