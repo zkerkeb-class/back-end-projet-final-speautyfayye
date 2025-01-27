@@ -1,4 +1,5 @@
 import {Generated, Insertable, Selectable, Updateable} from 'kysely';
+import {IAlbum} from './album';
 import {ICategory} from './category';
 import {ITrack} from './track';
 
@@ -33,15 +34,18 @@ export class Artist implements IArtist {
 export interface IArtistExt extends IArtist {
   category: ICategory | null;
   tracks: ITrack[];
+  albums: IAlbum[];
 }
 
 export class ArtistExt extends Artist implements IArtistExt {
   category: ICategory | null;
   tracks: ITrack[];
+  albums: IAlbum[];
 
   constructor(data: IArtistExt) {
     super(data);
     this.category = data.category;
     this.tracks = data.tracks;
+    this.albums = data.albums;
   }
 }

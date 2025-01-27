@@ -34,6 +34,14 @@ export default class ArtistRepository {
             .limit(20)
             .where('artist_album.artist_id', '=', id)
         ).as('tracks'),
+        jsonArrayFrom(
+          eb
+            .selectFrom('album')
+            .innerJoin('artist_album', 'artist_album.album_id', 'album.id')
+            .selectAll('album')
+            .limit(20)
+            .where('artist_album.artist_id', '=', id)
+        ).as('albums'),
         jsonObjectFrom(
           eb
             .selectFrom('category')
