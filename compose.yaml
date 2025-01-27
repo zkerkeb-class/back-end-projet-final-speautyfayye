@@ -5,7 +5,7 @@ services:
       context: .
       dockerfile: ./Dockerfile
     ports:
-      - ${API_PORT:?error}:${API_PORT:?error}
+      - ${PORT:?error}:${PORT:?error}
     env_file: .env
     networks:
       - speautyfayye-network
