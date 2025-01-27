@@ -1,5 +1,5 @@
 import {Request, Response} from 'express';
-import {IArtist} from '../models/artist';
+import {IArtist, IArtistExt} from '../models/artist';
 import {EStatusCode} from '../models/enums/statusCode';
 import {Error} from '../models/error';
 import {ApiResponse} from '../models/other/apiResponse';
@@ -21,13 +21,13 @@ export default class ArtistController {
 
   getById = async (req: Request, res: Response) => {
     const artistId = parseInt(req.params.id);
-    const artist = await this.artistRepository.getArtistById(artistId);
+    const artist = await this.artistRepository.getById(artistId);
 
     if (!artist) {
       throw new Error(EStatusCode.NOT_FOUND);
     }
 
-    const apiResponse = new ApiResponse<IArtist>({data: artist});
+    const apiResponse = new ApiResponse<IArtistExt>({data: artist});
     res.status(EStatusCode.OK).send(apiResponse);
   };
 

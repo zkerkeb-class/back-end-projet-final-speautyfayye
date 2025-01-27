@@ -1,5 +1,6 @@
+import {jsonArrayFrom, jsonObjectFrom} from 'kysely/helpers/postgres';
 import {db} from '../config/db/db';
-import {ArtistUpdate, IArtist, NewArtist} from '../models/artist';
+import {ArtistUpdate, IArtist, IArtistExt, NewArtist} from '../models/artist';
 import {EStatusCode} from '../models/enums/statusCode';
 import {Error} from '../models/error';
 
@@ -19,10 +20,27 @@ export default class ArtistRepository {
     return await query.execute();
   }
 
-  async getArtistById(id: number): Promise<IArtist | undefined> {
+  async getById(id: number): Promise<IArtistExt | undefined> {
     return await db
       .selectFrom('artist')
-      .selectAll()
+      .selectAll('artist')
+      .select(eb => [
+        jsonArrayFrom(
+          eb
+            .selectFrom('track')
+            .innerJoin('album', 'album.id', 'track.album_id')
+            .innerJoin('artist_album', 'artist_album.album_id', 'album.id')
+            .selectAll('track')
+            .limit(20)
+            .where('artist_album.artist_id', '=', id)
+        ).as('tracks'),
+        jsonObjectFrom(
+          eb
+            .selectFrom('category')
+            .selectAll('category')
+            .whereRef('category.id', '=', 'artist.category_id')
+        ).as('category'),
+      ])
       .where('id', '=', id)
       .executeTakeFirst();
   }
