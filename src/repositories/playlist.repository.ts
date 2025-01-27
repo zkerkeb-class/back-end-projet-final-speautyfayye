@@ -25,6 +25,7 @@ export default class PlaylistRepository {
         jsonArrayFrom(
           eb
             .selectFrom('track')
+            .innerJoin('playlist_track', 'track.id', 'playlist_track.track_id')
             .selectAll('track')
             .select(eb => [
               jsonObjectFrom(
@@ -51,7 +52,6 @@ export default class PlaylistRepository {
                   .whereRef('artist_album.album_id', '=', 'track.album_id')
               ).as('artist'),
             ])
-            .where('track.id', '=', id)
         ).as('tracks'),
       ])
       .executeTakeFirst();
