@@ -1,4 +1,4 @@
-import {jsonArrayFrom} from 'kysely/helpers/postgres';
+import {jsonArrayFrom, jsonObjectFrom} from 'kysely/helpers/postgres';
 import {db} from '../config/db/db';
 import {
   IPlaylist,
@@ -25,10 +25,33 @@ export default class PlaylistRepository {
         jsonArrayFrom(
           eb
             .selectFrom('track')
-            .innerJoin('playlist_track', 'track.id', 'playlist_track.track_id')
-            .where('playlist_track.playlist_id', '=', id)
             .selectAll('track')
-            .limit(20)
+            .select(eb => [
+              jsonObjectFrom(
+                eb
+                  .selectFrom('album')
+                  .selectAll('album')
+                  .whereRef('album.id', '=', 'track.album_id')
+              ).as('album'),
+              jsonObjectFrom(
+                eb
+                  .selectFrom('category')
+                  .selectAll('category')
+                  .whereRef('category.id', '=', 'track.category_id')
+              ).as('category'),
+              jsonObjectFrom(
+                eb
+                  .selectFrom('artist')
+                  .selectAll('artist')
+                  .innerJoin(
+                    'artist_album',
+                    'artist_album.artist_id',
+                    'artist.id'
+                  )
+                  .whereRef('artist_album.album_id', '=', 'track.album_id')
+              ).as('artist'),
+            ])
+            .where('track.id', '=', id)
         ).as('tracks'),
       ])
       .executeTakeFirst();

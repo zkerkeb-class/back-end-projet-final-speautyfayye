@@ -1,5 +1,5 @@
 import {Generated, Insertable, Selectable, Updateable} from 'kysely';
-import {ITrack} from './track';
+import {ITrackExt} from './track';
 
 export interface PlaylistTable {
   id: Generated<number>;
@@ -24,11 +24,11 @@ export class Playlist implements IPlaylist {
 }
 
 export interface IPlaylistExt extends IPlaylist {
-  tracks: ITrack[];
+  tracks: ITrackExt[];
 }
 
 export class PlaylistExt extends Playlist implements IPlaylistExt {
-  tracks: ITrack[];
+  tracks: ITrackExt[];
 
   constructor(data: IPlaylistExt) {
     super(data);
