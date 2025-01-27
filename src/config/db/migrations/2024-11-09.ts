@@ -14,6 +14,7 @@ export async function up(db: Kysely<any>): Promise<void> {
     .addColumn('id', 'serial', col => col.primaryKey())
     .addColumn('password', 'text', col => col.notNull())
     .addColumn('email', 'text', col => col.notNull().unique())
+    .addColumn('role', 'text', col => col.notNull())
     .execute();
 
   await db.schema

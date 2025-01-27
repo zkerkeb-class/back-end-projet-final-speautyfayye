@@ -1,5 +1,5 @@
 export default class CorsMiddleware {
-  allowedOrigins = ['http://example.com', 'http://localhost:3000'];
+  allowedOrigins = ['http://localhost:3000', 'https://speautyfayye.ckx.app'];
   options = {};
 
   constructor() {
