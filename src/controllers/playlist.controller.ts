@@ -58,4 +58,17 @@ export default class PlaylistController {
     const apiResponse = new ApiResponse<IPlaylist>({data: playlist});
     res.status(EStatusCode.OK).send(apiResponse);
   };
+
+  addTrack = async (req: Request, res: Response) => {
+    const playlistId = Number(req.params.id);
+    const trackId = Number(req.body.trackId);
+    if (!playlistId || !trackId) {
+      throw new Error(EStatusCode.BAD_REQUEST);
+    }
+    await this.playlistRepository.addTrack({
+      playlist_id: playlistId,
+      track_id: trackId,
+    });
+    res.status(EStatusCode.OK).send();
+  };
 }
