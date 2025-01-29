@@ -65,6 +65,13 @@ export default class PlaylistController {
     if (!playlistId || !trackId) {
       throw new Error(EStatusCode.BAD_REQUEST);
     }
+    const playlist = await this.playlistRepository.getById(playlistId);
+    if (!playlist) {
+      throw new Error(EStatusCode.NOT_FOUND);
+    }
+    if (playlist.tracks.some(track => track.id === trackId)) {
+      throw new Error(EStatusCode.CONFLICT);
+    }
     await this.playlistRepository.addTrack({
       playlist_id: playlistId,
       track_id: trackId,
