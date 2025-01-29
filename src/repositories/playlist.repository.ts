@@ -19,13 +19,13 @@ export default class PlaylistRepository {
   getById = async (id: number): Promise<IPlaylistExt | undefined> => {
     return await db
       .selectFrom('playlist')
-      .innerJoin('playlist_track', 'playlist_track.playlist_id', 'playlist.id')
       .selectAll('playlist')
       .select(eb => [
         jsonArrayFrom(
           eb
             .selectFrom('track')
             .selectAll('track')
+            .innerJoin('playlist_track', 'track.id', 'playlist_track.track_id')
             .select(eb => [
               jsonObjectFrom(
                 eb
@@ -51,6 +51,7 @@ export default class PlaylistRepository {
                   .whereRef('artist_album.album_id', '=', 'track.album_id')
               ).as('artist'),
             ])
+            .where('playlist_track.playlist_id', '=', id)
         ).as('tracks'),
       ])
       .where('playlist.id', '=', id)
@@ -82,10 +83,6 @@ export default class PlaylistRepository {
       ])
       .execute();
 
-    console.log(
-      '🚀 ~ PlaylistRepository ~ getAll= ~ playlists:',
-      playlists.map(p => p.tracks)
-    );
     return playlists;
   };
 
