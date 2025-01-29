@@ -33,10 +33,12 @@ import {migrateToLatest} from './config/db/db';
 import AlbumController from './controllers/album.controller';
 import ArtistController from './controllers/artist.controller';
 import CategoryController from './controllers/category.controller';
+import MetricsController from './controllers/metrics.controller';
 import PlaylistController from './controllers/playlist.controller';
 import SearchController from './controllers/search.controller';
 import TrackController from './controllers/track.controller';
 import UserController from './controllers/user.controller';
+import MeasureRequestTime from './middleware/request-timer.middleware';
 import AlbumRepository from './repositories/album.repository';
 import ArtistRepository from './repositories/artist.repository';
 import CategoryRepository from './repositories/category.repository';
@@ -48,15 +50,13 @@ import UserRepository from './repositories/user.repository';
 import AlbumRouter from './routers/album.router';
 import ArtistRouter from './routers/artist.router';
 import CategoryRouter from './routers/category.router';
+import MetricsRouter from './routers/metrics.router';
 import PlaylistRouter from './routers/playlist.router';
 import SearchRouter from './routers/search.router';
 import TrackRouter from './routers/track.router';
 import UserRouter from './routers/user.router';
 import swaggerOutput from './swagger_output.json';
 import AuthValidators from './validators/auth.validators';
-import MeasureRequestTime  from './middleware/request-timer.middleware';
-import MetricsController from './controllers/metrics.controller';
-import MetricsRouter from './routers/metrics.router';
 
 const limiter = new RateLimiter();
 const corsMiddleware = new CorsMiddleware();
@@ -132,7 +132,10 @@ const userController = new UserController(
   authService,
   authValidators
 );
-const playlistController = new PlaylistController(playlistRepository);
+const playlistController = new PlaylistController(
+  playlistRepository,
+  logRepository
+);
 const trackController = new TrackController(trackRepository);
 const albumController = new AlbumController(albumRepository);
 const categoryController = new CategoryController(categoryRepository);

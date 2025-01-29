@@ -3,10 +3,14 @@ import {EStatusCode} from '../models/enums/statusCode';
 import {Error} from '../models/error';
 import {ApiResponse} from '../models/other/apiResponse';
 import {IPlaylist, IPlaylistExt, PlaylistUpdate} from '../models/playlist';
+import LogRepository from '../repositories/log.repository';
 import PlaylistRepository from '../repositories/playlist.repository';
 
 export default class PlaylistController {
-  constructor(private readonly playlistRepository: PlaylistRepository) {}
+  constructor(
+    private readonly playlistRepository: PlaylistRepository,
+    private readonly logRepository: LogRepository
+  ) {}
 
   get = async (req: Request, res: Response) => {
     const playlistId = Number(req.params.id);
@@ -76,6 +80,10 @@ export default class PlaylistController {
       playlist_id: playlistId,
       track_id: trackId,
     });
+    this.logRepository.logger.info('Track added to playlist', {
+      playlistId,
+      trackId,
+    });
     res.status(EStatusCode.CREATED).send();
   };
 
@@ -98,6 +106,10 @@ export default class PlaylistController {
       throw new Error(EStatusCode.NOT_FOUND);
     }
     await this.playlistRepository.deleteTrack({
+      playlist_id,
+      track_id,
+    });
+    this.logRepository.logger.info('Track deleted from playlist', {
       playlist_id,
       track_id,
     });
