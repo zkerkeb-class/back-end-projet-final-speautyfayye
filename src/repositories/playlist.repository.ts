@@ -106,4 +106,12 @@ export default class PlaylistRepository {
   addTrack = async (playlist_track: NewPlaylistTrack): Promise<void> => {
     await db.insertInto('playlist_track').values(playlist_track).execute();
   };
+
+  deleteTrack = async (playlist_track: NewPlaylistTrack): Promise<void> => {
+    await db
+      .deleteFrom('playlist_track')
+      .where('playlist_id', '=', playlist_track.playlist_id)
+      .where('track_id', '=', playlist_track.track_id)
+      .execute();
+  };
 }

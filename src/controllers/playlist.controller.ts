@@ -76,6 +76,26 @@ export default class PlaylistController {
       playlist_id: playlistId,
       track_id: trackId,
     });
+    res.status(EStatusCode.CREATED).send();
+  };
+
+  deleteTrack = async (req: Request, res: Response) => {
+    const playlistId = Number(req.params.id);
+    const trackId = Number(req.body.trackId);
+    if (!playlistId || !trackId) {
+      throw new Error(EStatusCode.BAD_REQUEST);
+    }
+    const playlist = await this.playlistRepository.getById(playlistId);
+    if (!playlist) {
+      throw new Error(EStatusCode.NOT_FOUND);
+    }
+    if (!playlist.tracks.some(track => track.id === trackId)) {
+      throw new Error(EStatusCode.NOT_FOUND);
+    }
+    await this.playlistRepository.deleteTrack({
+      playlist_id: playlistId,
+      track_id: trackId,
+    });
     res.status(EStatusCode.OK).send();
   };
 }

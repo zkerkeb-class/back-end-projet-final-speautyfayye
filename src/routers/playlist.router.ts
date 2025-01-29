@@ -17,6 +17,9 @@ export default class PlaylistRouter {
     this.router.route('/:id').delete(this.playlistController.delete);
     this.router.route('/:id').put(this.playlistController.update);
 
-    this.router.route('/:id/add').post(this.playlistController.addTrack);
+    this.router.route('/:id/track/').post(this.playlistController.addTrack);
+    this.router
+      .route('/:id/track/')
+      .delete(this.playlistController.deleteTrack);
   }
 }
