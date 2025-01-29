@@ -6,7 +6,7 @@ import {
   NewPlaylist,
   PlaylistUpdate,
 } from '../models/playlist';
-import {NewPlaylistTrack} from '../models/playlist_track';
+import {IPlaylistTrack, NewPlaylistTrack} from '../models/playlist_track';
 
 export default class PlaylistRepository {
   create = async (playlist: NewPlaylist): Promise<IPlaylist> => {
@@ -107,7 +107,7 @@ export default class PlaylistRepository {
     await db.insertInto('playlist_track').values(playlist_track).execute();
   };
 
-  deleteTrack = async (playlist_track: NewPlaylistTrack): Promise<void> => {
+  deleteTrack = async (playlist_track: IPlaylistTrack): Promise<void> => {
     await db
       .deleteFrom('playlist_track')
       .where('playlist_id', '=', playlist_track.playlist_id)

@@ -80,26 +80,26 @@ export default class PlaylistController {
   };
 
   deleteTrack = async (req: Request, res: Response) => {
-    const playlistId = Number(req.params.id);
+    const playlist_id = Number(req.params.id);
+    const track_id = Number(req.body.trackId);
+    console.log('🚀 ~ PlaylistController ~ deleteTrack ~ track_id:', track_id);
     console.log(
-      '🚀 ~ PlaylistController ~ deleteTrack ~ playlistId:',
-      playlistId
+      '🚀 ~ PlaylistController ~ deleteTrack ~ playlist_id:',
+      playlist_id
     );
-    const trackId = Number(req.body.trackId);
-    console.log('🚀 ~ PlaylistController ~ deleteTrack ~ trackId:', trackId);
-    if (!playlistId || !trackId) {
+    if (!playlist_id || !track_id) {
       throw new Error(EStatusCode.BAD_REQUEST);
     }
-    const playlist = await this.playlistRepository.getById(playlistId);
+    const playlist = await this.playlistRepository.getById(playlist_id);
     if (!playlist) {
       throw new Error(EStatusCode.NOT_FOUND);
     }
-    if (!playlist.tracks.some(track => track.id === trackId)) {
+    if (!playlist.tracks.some(track => track.id === track_id)) {
       throw new Error(EStatusCode.NOT_FOUND);
     }
     await this.playlistRepository.deleteTrack({
-      playlist_id: playlistId,
-      track_id: trackId,
+      playlist_id,
+      track_id,
     });
     res.status(EStatusCode.OK).send();
   };
