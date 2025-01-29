@@ -23,4 +23,19 @@ export default class SearchController {
     res.status(EStatusCode.OK).send(apiResponse);
 
     }
+
+  autoComplete = async (req: Request, res: Response) => {
+    const { q: query } = req.query;
+    const limit = req.query.limit ? Number(req.query.limit) : undefined;
+    
+    if (!query || typeof query !== 'string') {
+      throw new Error(EStatusCode.BAD_REQUEST, {
+        message: 'Query parameter is required'
+      });
+    }
+
+    const suggestions = await this.searchRepository.getAutoCompleteSuggestions(query, limit);
+    const apiResponse = new ApiResponse({data: suggestions});
+    res.status(EStatusCode.OK).send(apiResponse);
+  };
 }

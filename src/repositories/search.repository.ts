@@ -12,6 +12,13 @@ interface SearchOutput {
     tracks: ITrack[];
 }
 
+interface AutoCompleteResult {
+  id: number;
+  title: string;
+  type: 'track' | 'artist';
+  plays: number;
+}
+
 export default class SearchRepository {
     async search(input: string | undefined , limit: number = 5): Promise<SearchOutput> {
         const [artists, albums, playlists, tracks] = await Promise.all([
@@ -48,4 +55,36 @@ export default class SearchRepository {
             "tracks": tracks
         };
   };
+
+  async getAutoCompleteSuggestions(query: string, limit: number = 5): Promise<AutoCompleteResult[]> {
+    const [popularTracks, popularArtists] = await Promise.all([
+      db.selectFrom('track')
+        .select([
+          'track.id',
+          'track.title',
+          'track.number_of_plays as plays',
+          eb => eb.val('track').as('type')
+        ])
+        .where('track.title', 'ilike', `${query}%`)
+        .orderBy('track.number_of_plays', 'desc')
+        .limit(limit)
+        .execute(),
+      db.selectFrom('artist')
+        .leftJoin('artist_album', 'artist_album.artist_id', 'artist.id')
+        .leftJoin('track', 'track.album_id', 'artist_album.album_id')
+        .select([
+          'artist.id',
+          'artist.name as title',
+          eb => eb.fn.sum('track.number_of_plays').as('plays'),
+          eb => eb.val('artist').as('type')
+        ])
+        .where('artist.name', 'ilike', `${query}%`)
+        .groupBy('artist.id')
+        .orderBy('plays', 'desc')
+        .limit(limit)
+        .execute()
+    ]);
+
+    return [...popularTracks, ...popularArtists] as AutoCompleteResult[];
+  }
 }
