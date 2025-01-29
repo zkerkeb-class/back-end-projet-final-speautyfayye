@@ -8,8 +8,15 @@ import ArtistRepository from '../repositories/artist.repository';
 export default class ArtistController {
   constructor(private readonly artistRepository: ArtistRepository) {}
 
-  getAll = async (_req: Request, res: Response) => {
-    const artists = await this.artistRepository.getAllArtists();
+  getAll = async (req: Request, res: Response) => {
+    const { category_id, sortOrder } = req.query;
+    
+    const options = {
+      category_id: category_id ? Number(category_id) : undefined,
+      sortOrder: sortOrder as 'asc' | 'desc' | undefined
+    };
+
+    const artists = await this.artistRepository.getAllArtists(options);
 
     if (!artists) {
       throw new Error(EStatusCode.NOT_FOUND);

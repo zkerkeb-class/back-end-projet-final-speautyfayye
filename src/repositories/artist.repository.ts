@@ -5,17 +5,17 @@ import {EStatusCode} from '../models/enums/statusCode';
 import {Error} from '../models/error';
 
 export default class ArtistRepository {
-  async getAllArtists(option?: {category_id?: number}): Promise<IArtist[]> {
+  async getAllArtists(options?: {
+    category_id?: number;
+    sortOrder?: 'asc' | 'desc';
+  }): Promise<IArtist[]> {
     let query = db.selectFrom('artist').selectAll();
 
-    if (option?.category_id) {
-      query = query.where('category_id', '=', option.category_id);
+    if (options?.category_id) {
+      query = query.where('category_id', '=', options.category_id);
     }
 
-    query = query.orderBy('artist.name', 'asc');
-    if (option?.category_id) {
-      query = query.where('category_id', '=', option.category_id);
-    }
+    query = query.orderBy('artist.name', options?.sortOrder || 'asc');
 
     return await query.execute();
   }
