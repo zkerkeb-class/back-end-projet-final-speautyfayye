@@ -1,5 +1,5 @@
 import {DB_HOST, DB_NAME, DB_PWD, DB_USER, DB_PORT} from '../env';
-import {FileMigrationProvider, Kysely, Migrator, PostgresDialect} from 'kysely';
+import {FileMigrationProvider, Kysely, Migrator, PostgresDialect, KyselyPlugin, PluginTransformQueryArgs, PluginTransformResultArgs, QueryResult} from 'kysely';
 import {Pool} from 'pg';
 import {promises as fs} from 'node:fs';
 import * as path from 'node:path';
@@ -12,6 +12,7 @@ import {TrackTable} from '../../models/track';
 import {PlaylistTable} from '../../models/playlist';
 import {CategoryTable} from '../../models/category';
 import {FileTable} from '../../models/file';
+import MeasureRequestTime from '../../middleware/request-timer.middleware';
 
 interface Database {
   user: UserTable;
@@ -25,6 +26,27 @@ interface Database {
   file: FileTable;
 }
 
+const queryPlugin: KyselyPlugin = {
+  transformQuery: (args: PluginTransformQueryArgs) => {
+    const start = Date.now();
+    try {
+      return args.node;
+    } finally {
+      const duration = Date.now() - start;
+      MeasureRequestTime.addDbQueryTime(duration);
+    }
+  },
+  transformResult: async (args: PluginTransformResultArgs) => {
+    const start = Date.now();
+    try {
+      return args.result;
+    } finally {
+      const duration = Date.now() - start;
+      MeasureRequestTime.addDbQueryTime(duration);
+    }
+  }
+};
+
 export const db = new Kysely<Database>({
   dialect: new PostgresDialect({
     pool: new Pool({
@@ -36,6 +58,7 @@ export const db = new Kysely<Database>({
       max: 10,
     }),
   }),
+  plugins: [queryPlugin]
 });
 
 export async function migrateToLatest() {

@@ -54,10 +54,13 @@ import TrackRouter from './routers/track.router';
 import UserRouter from './routers/user.router';
 import swaggerOutput from './swagger_output.json';
 import AuthValidators from './validators/auth.validators';
+import MeasureRequestTime  from './middleware/request-timer.middleware';
+import MetricsController from './controllers/metrics.controller';
+import MetricsRouter from './routers/metrics.router';
 
 const limiter = new RateLimiter();
 const corsMiddleware = new CorsMiddleware();
-// const measureRequestTime = new MeasureRequestTime();
+const measureRequestTime = new MeasureRequestTime();
 
 const app: Express = express();
 app.use(helmet());
@@ -65,7 +68,7 @@ app.use(cors(corsMiddleware.options));
 app.use(compression());
 app.use(express.json({limit: '10kb'}));
 app.use(cookieParser());
-// app.use(measureRequestTime.get);
+app.use(measureRequestTime.get);
 // app.use(limiter.global);
 
 migrateToLatest();
@@ -135,6 +138,7 @@ const albumController = new AlbumController(albumRepository);
 const categoryController = new CategoryController(categoryRepository);
 const artistController = new ArtistController(artistRepository);
 const searchController = new SearchController(searchRepository);
+const metricsController = new MetricsController();
 //#endregion
 
 //#region Routers
@@ -152,6 +156,7 @@ const albumRouter = new AlbumRouter(albumController);
 const categoryRouter = new CategoryRouter(categoryController);
 const artistRouter = new ArtistRouter(artistController);
 const searchRouter = new SearchRouter(searchController);
+const metricsRouter = new MetricsRouter(metricsController);
 //#endregion
 
 //#region Endpoints
@@ -166,6 +171,7 @@ app.use('/album', albumRouter.router);
 app.use('/category', categoryRouter.router);
 app.use('/artist', artistRouter.router);
 app.use('/search', searchRouter.router);
+app.use('/metrics', metricsRouter.router);
 app.use(errorController.errorHandler);
 //#endregion
 
