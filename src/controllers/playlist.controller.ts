@@ -90,11 +90,6 @@ export default class PlaylistController {
   deleteTrack = async (req: Request, res: Response) => {
     const playlist_id = Number(req.params.id);
     const track_id = Number(req.body.trackId);
-    console.log('🚀 ~ PlaylistController ~ deleteTrack ~ track_id:', track_id);
-    console.log(
-      '🚀 ~ PlaylistController ~ deleteTrack ~ playlist_id:',
-      playlist_id
-    );
     if (!playlist_id || !track_id) {
       throw new Error(EStatusCode.BAD_REQUEST);
     }

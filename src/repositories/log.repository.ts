@@ -5,7 +5,7 @@ export default class LogRepository {
     level: 'info',
     format: winston.format.json(),
     transports: [
-      new winston.transports.File({filename: '../../logs.log', level: 'info'}),
+      new winston.transports.File({filename: './logs.log', level: 'info'}),
     ],
   });
 }
