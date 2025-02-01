@@ -34,4 +34,8 @@ export default class CategoryRepository {
       .where('category.id', '=', id)
       .executeTakeFirst();
   };
+
+  getAll = async (): Promise<ICategory[]> => {
+    return await db.selectFrom('category').selectAll('category').execute();
+  };
 }

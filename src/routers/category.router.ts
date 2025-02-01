@@ -13,5 +13,6 @@ export default class CategoryRouter {
     this.router.route('/:id').get(this.categoryController.get);
 
     this.router.route('/').post(this.categoryController.create);
+    this.router.route('/').get(this.categoryController.getAll);
   }
 }

@@ -20,6 +20,13 @@ export default class CategoryController {
     res.status(EStatusCode.OK).send(apiResponse);
   };
 
+  //TODO: function that get all categories
+  getAll = async (req: Request, res: Response) => {
+    const categories = await this.categoryRepository.getAll();
+    const apiResponse = new ApiResponse<ICategoryExt>({data: categories});
+    res.status(EStatusCode.OK).send(apiResponse);
+  };
+
   create = async (req: Request, res: Response) => {
     const category = await this.categoryRepository.create(
       req.body as NewCategory
