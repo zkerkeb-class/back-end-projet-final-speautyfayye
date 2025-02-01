@@ -12,5 +12,6 @@ export default class SearchRouter {
   private createRoutes() {
     this.router.route('/').get(this.searchController.get);
     this.router.route('/autocomplete').get(this.searchController.autoComplete);
+    this.router.route('/similar/:id').get(this.searchController.findSimilar);
   }
 }

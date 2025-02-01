@@ -38,4 +38,19 @@ export default class SearchController {
     const apiResponse = new ApiResponse({data: suggestions});
     res.status(EStatusCode.OK).send(apiResponse);
   };
+
+  findSimilar = async (req: Request, res: Response) => {
+    const trackId = Number(req.params.id);
+    const limit = req.query.limit ? Number(req.query.limit) : undefined;
+    
+    if (!trackId) {
+      throw new Error(EStatusCode.BAD_REQUEST, {
+        message: 'Track ID is required'
+      });
+    }
+
+    const similarTracks = await this.searchRepository.findSimilarTracks(trackId, limit);
+    const apiResponse = new ApiResponse({data: similarTracks});
+    res.status(EStatusCode.OK).send(apiResponse);
+  };
 }
