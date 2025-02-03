@@ -1,16 +1,15 @@
+import {sql} from 'kysely';
 import {db} from '../config/db/db';
+import {IAlbum} from '../models/album';
+import {IArtist} from '../models/artist';
+import {IPlaylist} from '../models/playlist';
 import {ITrack} from '../models/track';
-import { IArtist } from '../models/artist';
-import { IAlbum } from '../models/album';
-import { IPlaylist } from '../models/playlist';
-import { sql } from 'kysely';
-
 
 interface SearchOutput {
-    artists: IArtist[];
-    albums: IAlbum[];
-    playlists: IPlaylist[];
-    tracks: ITrack[];
+  artists: IArtist[];
+  albums: IAlbum[];
+  playlists: IPlaylist[];
+  tracks: ITrack[];
 }
 
 interface AutoCompleteResult {
@@ -34,76 +33,86 @@ interface SimilarTracksResponse {
 }
 
 export default class SearchRepository {
-    async search(input: string | undefined , limit: number = 5): Promise<SearchOutput> {
-        const [artists, albums, playlists, tracks] = await Promise.all([
-            db
-                .selectFrom('artist')
-                .selectAll()
-                .where('artist.name', 'ilike', `%${input}%`)
-                .limit(limit)
-                .execute(),
-            db
-                .selectFrom('album')
-                .selectAll()
-                .where('album.title', 'ilike', `%${input}%`)
-                .limit(limit)
-                .execute(),
-            db
-                .selectFrom('playlist')
-                .selectAll()
-                .where('playlist.title', 'ilike', `%${input}%`)
-                .limit(limit)
-                .execute(),
-            db
-                .selectFrom('track')
-                .selectAll()
-                .where('track.title', 'ilike', `%${input}%`)
-                .limit(limit)
-                .execute()
-        ]);               
+  async search(
+    input: string | undefined,
+    limit: number = 5
+  ): Promise<SearchOutput> {
+    const [artists, albums, playlists, tracks] = await Promise.all([
+      db
+        .selectFrom('artist')
+        .selectAll()
+        .where('artist.name', 'ilike', `%${input}%`)
+        .limit(limit)
+        .execute(),
+      db
+        .selectFrom('album')
+        .selectAll()
+        .where('album.title', 'ilike', `%${input}%`)
+        .limit(limit)
+        .execute(),
+      db
+        .selectFrom('playlist')
+        .selectAll()
+        .where('playlist.title', 'ilike', `%${input}%`)
+        .limit(limit)
+        .execute(),
+      db
+        .selectFrom('track')
+        .selectAll()
+        .where('track.title', 'ilike', `%${input}%`)
+        .limit(limit)
+        .execute(),
+    ]);
 
-        return {
-            "artists": artists,
-            "albums": albums,
-            "playlists": playlists,
-            "tracks": tracks
-        };
-  };
+    return {
+      artists: artists,
+      albums: albums,
+      playlists: playlists,
+      tracks: tracks,
+    };
+  }
 
-  async getAutoCompleteSuggestions(query: string, limit: number = 5): Promise<AutoCompleteResult[]> {
+  async getAutoCompleteSuggestions(
+    query: string,
+    limit: number = 5
+  ): Promise<AutoCompleteResult[]> {
     const [popularTracks, popularArtists] = await Promise.all([
-      db.selectFrom('track')
+      db
+        .selectFrom('track')
         .select([
           'track.id',
           'track.title',
           'track.number_of_plays as plays',
-          eb => eb.val('track').as('type')
+          eb => eb.val('track').as('type'),
         ])
         .where('track.title', 'ilike', `${query}%`)
         .orderBy('track.number_of_plays', 'desc')
         .limit(limit)
         .execute(),
-      db.selectFrom('artist')
+      db
+        .selectFrom('artist')
         .leftJoin('artist_album', 'artist_album.artist_id', 'artist.id')
         .leftJoin('track', 'track.album_id', 'artist_album.album_id')
         .select([
           'artist.id',
           'artist.name as title',
           eb => eb.fn.sum('track.number_of_plays').as('plays'),
-          eb => eb.val('artist').as('type')
+          eb => eb.val('artist').as('type'),
         ])
         .where('artist.name', 'ilike', `${query}%`)
         .groupBy('artist.id')
         .orderBy('plays', 'desc')
         .limit(limit)
-        .execute()
+        .execute(),
     ]);
 
     return [...popularTracks, ...popularArtists] as AutoCompleteResult[];
   }
 
-  async findSimilarTracks(trackId: number, limit: number = 20): Promise<SimilarTracksResponse> {
-
+  async findSimilarTracks(
+    trackId: number,
+    limit: number = 20
+  ): Promise<SimilarTracksResponse> {
     const referenceTrack = await db
       .selectFrom('track')
       .innerJoin('category', 'category.id', 'track.category_id')
@@ -112,7 +121,7 @@ export default class SearchRepository {
         'track.id',
         'track.category_id',
         'album.releaseDate',
-        'track.number_of_plays'
+        'track.number_of_plays',
       ])
       .where('track.id', '=', trackId)
       .executeTakeFirst();
@@ -120,7 +129,7 @@ export default class SearchRepository {
     if (!referenceTrack) {
       return {
         count: 0,
-        tracks: []
+        tracks: [],
       };
     }
 
@@ -135,8 +144,10 @@ export default class SearchRepository {
         'track.title',
         'artist.name as artist',
         'category.name as genre',
-        eb => eb.fn.coalesce(
-          sql<number>`
+        eb =>
+          eb.fn
+            .coalesce(
+              sql<number>`
             CASE 
               WHEN track.category_id = ${referenceTrack.category_id} THEN 1
               ELSE 0
@@ -146,8 +157,9 @@ export default class SearchRepository {
               ELSE 0
             END
           `,
-          eb.val(0)
-        ).as('similarity_score')
+              eb.val(0)
+            )
+            .as('similarity_score'),
       ])
       .where('track.id', '!=', trackId)
       .orderBy('similarity_score', 'desc')
@@ -162,10 +174,8 @@ export default class SearchRepository {
         artist: t.artist,
         genre: t.genre,
         similarity_score: t.similarity_score,
-      }))
+      })),
     };
-
-    console.log("result", result);
 
     return result;
   }
