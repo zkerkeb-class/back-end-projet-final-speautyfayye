@@ -27,8 +27,6 @@ export default class AudioController {
   };
 
   get = async (req: Request, res: Response) => {
-    setTimeout(() => {}, 2000);
-
     const trackId = Number(req.params.id);
     if (!trackId || isNaN(trackId)) {
       throw new Error(EStatusCode.BAD_REQUEST);
