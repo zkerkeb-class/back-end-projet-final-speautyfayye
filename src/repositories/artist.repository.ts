@@ -92,6 +92,7 @@ export default class ArtistRepository {
           picture: data.picture,
         })
         .where('id', '=', id)
+        .returningAll()
         .execute();
     } catch (error) {
       const hasMessage = 'message' in (error as any);

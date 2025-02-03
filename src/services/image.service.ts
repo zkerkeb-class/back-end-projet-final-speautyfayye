@@ -49,7 +49,11 @@ export default class ImageService {
     return uuid;
   };
 
-  read(name: string, size: string, extension: Extension): ReadStream {
+  read(
+    name: string,
+    size: string,
+    extension: Extension
+  ): ReadStream | undefined {
     const directory: IDirectory = {
       name: name,
       type: EFileType.IMAGE,

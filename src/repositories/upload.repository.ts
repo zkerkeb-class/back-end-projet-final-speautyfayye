@@ -48,13 +48,16 @@ export default class UploadRepository {
     await Promise.all(data.map(d => this.upload(d, directoryPath)));
   }
 
-  read(file: IFile, directoryPath: string): ReadStream {
+  read(file: IFile, directoryPath: string): ReadStream | undefined {
     file.suffixes?.unshift(file.name);
     const filename = (file.suffixes?.join('-') ?? file.name).concat(
       '.',
       file.extension
     );
-    return fs.createReadStream(`${path.join(directoryPath, filename)}`);
+    if (fs.existsSync(filename)) {
+      return fs.createReadStream(`${path.join(directoryPath, filename)}`);
+    }
+    return undefined;
   }
 
   readPartial(
