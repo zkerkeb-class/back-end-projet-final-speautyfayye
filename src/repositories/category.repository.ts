@@ -27,7 +27,6 @@ export default class CategoryRepository {
           eb
             .selectFrom('track')
             .selectAll('track')
-            .limit(5)
             .where('track.category_id', '=', id)
         ).as('tracks'),
       ])
