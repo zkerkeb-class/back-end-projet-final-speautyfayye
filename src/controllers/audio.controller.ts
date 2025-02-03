@@ -29,7 +29,10 @@ export default class AudioController {
   get = async (req: Request, res: Response) => {
     const trackId = Number(req.params.id);
     if (!trackId || isNaN(trackId)) {
-      throw new Error(EStatusCode.BAD_REQUEST);
+      throw new Error(EStatusCode.BAD_REQUEST, {
+        logLevel: 'warn',
+        message: 'Invalid track id',
+      });
     }
 
     const track = await this.trackRepository.getById(trackId);
@@ -58,7 +61,7 @@ export default class AudioController {
         readable.pipe(res);
       } else {
         const {readable} = this.audioService.read(track.audio);
-        res.writeHead(EStatusCode.PARTIAL_CONTENT, {
+        res.writeHead(EStatusCode.OK, {
           'Content-Type': 'audio/mp3',
           duration: track.duration,
           'Access-Control-Expose-Headers': 'duration',

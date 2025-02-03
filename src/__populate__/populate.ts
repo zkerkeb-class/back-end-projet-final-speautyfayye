@@ -76,6 +76,10 @@ const populate = async () => {
       console.error('Erreur lors de la lecture du répertoire:', err);
       return;
     }
+    if (!files.length) {
+      console.error('Aucun fichier trouvé');
+      return;
+    }
     if (files.some(file => !file.endsWith('.mp3'))) {
       console.error('Fichier mp3 seulement');
       return;

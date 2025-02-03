@@ -54,7 +54,7 @@ export default class UploadRepository {
       '.',
       file.extension
     );
-    if (fs.existsSync(filename)) {
+    if (fs.existsSync(`${path.join(directoryPath, filename)}`)) {
       return fs.createReadStream(`${path.join(directoryPath, filename)}`);
     }
     return undefined;

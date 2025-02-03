@@ -1,6 +1,8 @@
 import {Readable} from 'node:stream';
 import {EAudioExtension} from '../models/enums/extension';
 import {EFileType} from '../models/enums/fileType';
+import {EStatusCode} from '../models/enums/statusCode';
+import {Error} from '../models/error';
 import FileRepository from '../repositories/file.repository';
 import UploadRepository, {IDirectory} from '../repositories/upload.repository';
 import ConvertService from './convert.service';
@@ -54,7 +56,10 @@ export default class AudioService {
     );
 
     if (!readable) {
-      throw new Error('File not found');
+      throw new Error(EStatusCode.NOT_FOUND, {
+        logLevel: 'warn',
+        message: `File ${name} not found`,
+      });
     }
 
     return {
