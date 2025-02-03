@@ -1,10 +1,14 @@
 import express, {Router} from 'express';
 import AlbumController from '../controllers/album.controller';
+import CacheMiddleware from '../middleware/cache.middleware';
 
 export default class AlbumRouter {
   router: Router;
 
-  constructor(private readonly albumController: AlbumController) {
+  constructor(
+    private readonly albumController: AlbumController,
+    private readonly cacheMiddleware: CacheMiddleware
+  ) {
     this.router = express.Router();
     this.createRoutes();
   }
@@ -14,6 +18,8 @@ export default class AlbumRouter {
     this.router.route('/:id').put(this.albumController.updateById);
     this.router.route('/:id').get(this.albumController.getById);
     this.router.route('/').post(this.albumController.create);
-    this.router.route('/').get(this.albumController.getAllWithFilters);
+    this.router
+      .route('/')
+      .get(this.cacheMiddleware.get, this.albumController.getAllWithFilters);
   }
 }

@@ -154,13 +154,13 @@ const fileRouter = new ImageRouter(
   authMiddleware,
   cacheMiddleware
 );
-const audioRouter = new AudioRouter(audioController);
+const audioRouter = new AudioRouter(audioController, cacheMiddleware);
 const userRouter = new UserRouter(userController);
-const playlistRouter = new PlaylistRouter(playlistController);
+const playlistRouter = new PlaylistRouter(playlistController, cacheMiddleware);
 const trackRouter = new TrackRouter(trackController);
-const albumRouter = new AlbumRouter(albumController);
+const albumRouter = new AlbumRouter(albumController, cacheMiddleware);
 const categoryRouter = new CategoryRouter(categoryController);
-const artistRouter = new ArtistRouter(artistController);
+const artistRouter = new ArtistRouter(artistController, cacheMiddleware);
 const searchRouter = new SearchRouter(searchController);
 const metricsRouter = new MetricsRouter(metricsController);
 //#endregion

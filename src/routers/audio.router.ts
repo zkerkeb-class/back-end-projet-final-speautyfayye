@@ -2,6 +2,7 @@ import express, {Request, Router} from 'express';
 import multer from 'multer';
 import path from 'node:path';
 import AudioController from '../controllers/audio.controller';
+import CacheMiddleware from '../middleware/cache.middleware';
 
 const allowedExtensions = ['.mp3'];
 
@@ -14,7 +15,10 @@ export default class AudioRouter {
   });
   router: Router;
 
-  constructor(private readonly audioController: AudioController) {
+  constructor(
+    private readonly audioController: AudioController,
+    private readonly cacheMiddleware: CacheMiddleware
+  ) {
     this.router = express.Router();
     this.createRoutes();
   }
@@ -24,7 +28,9 @@ export default class AudioRouter {
       .route('/upload')
       .post(this.multer.array('files'), this.audioController.upload);
 
-    this.router.route('/:id').get(this.audioController.get);
+    this.router
+      .route('/:id')
+      .get(this.cacheMiddleware.get, this.audioController.get);
   }
 
   private fileFilter(
