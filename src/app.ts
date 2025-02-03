@@ -30,6 +30,7 @@ import AuthService from './services/auth.service';
 
 import swaggerUi from 'swagger-ui-express';
 import {migrateToLatest} from './config/db/db';
+import {isTest} from './config/env';
 import AlbumController from './controllers/album.controller';
 import ArtistController from './controllers/artist.controller';
 import CategoryController from './controllers/category.controller';
@@ -71,9 +72,9 @@ app.use(cookieParser());
 app.use(measureRequestTime.get);
 // app.use(limiter.global);
 
-// if (!isTest) {
-migrateToLatest();
-// }
+if (!isTest) {
+  migrateToLatest();
+}
 
 //#region Repositories
 const logRepository = new LogRepository();
