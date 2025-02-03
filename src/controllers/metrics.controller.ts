@@ -21,7 +21,9 @@ export default class MetricsController {
     res.status(EStatusCode.OK).send(apiResponse);
   };
 
-  getRequestStats = async (_req: Request, res: Response) => {
+  getRequestStats = async (req: Request, res: Response) => {
+    const limit = req.query.limit ? Number(req.query.limit) : 10; // Valeur par défaut de 10
+
     const stats = MeasureRequestTime.getStats();
     const successRate = stats.totalRequests > 0 
       ? (stats.successfulRequests / stats.totalRequests * 100).toFixed(2)
@@ -33,20 +35,22 @@ export default class MetricsController {
       failedRequests: stats.failedRequests,
       successRate: `${successRate}%`,
       failureRate: `${(100 - parseFloat(successRate)).toFixed(2)}%`,
-      requestsByEndpoint: Object.entries(stats.requestsByEndpoint).map(([endpoint, data]) => ({
-        endpoint,
-        total: data.total,
-        successful: data.successful,
-        failed: data.failed,
-        totalDuration: data.totalDuration,
-        averageResponseTime: `${data.averageResponseTime.toFixed(2)}ms`,
-        successRate: `${(data.successful / data.total * 100).toFixed(2)}%`,
-        dbQueries: {
-          totalQueries: data.dbQueries.total,
-          averageQueryTime: `${data.dbQueries.averageQueryTime.toFixed(2)}ms`,
-          totalQueryTime: `${data.dbQueries.totalDuration}ms`
-        }
-      })),
+      requestsByEndpoint: Object.entries(stats.requestsByEndpoint)
+        .map(([endpoint, data]) => ({
+          endpoint,
+          total: data.total,
+          successful: data.successful,
+          failed: data.failed,
+          totalDuration: data.totalDuration,
+          averageResponseTime: `${data.averageResponseTime.toFixed(2)}ms`,
+          successRate: `${(data.successful / data.total * 100).toFixed(2)}%`,
+          dbQueries: {
+            totalQueries: data.dbQueries.total,
+            averageQueryTime: `${data.dbQueries.averageQueryTime.toFixed(2)}ms`,
+            totalQueryTime: `${data.dbQueries.totalDuration}ms`
+          }
+        }))
+        .slice(0, limit), // Limite le nombre d'endpoints retournés
       totalDbQueries: {
         totalQueries: stats.dbQueries.total,
         averageQueryTime: `${stats.dbQueries.averageQueryTime.toFixed(2)}ms`,
