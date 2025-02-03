@@ -1,11 +1,14 @@
 import {Request, Response} from 'express';
-import {ApiResponse} from '../models/other/apiResponse';
+import z from 'zod';
 import {EStatusCode} from '../models/enums/statusCode';
+import {Error} from '../models/error';
+import {ApiResponse} from '../models/other/apiResponse';
 import {ITrack, NewTrack, TrackExt, TrackUpdate} from '../models/track';
 import TrackRepository from '../repositories/track.repository';
-import {Error} from '../models/error';
 
 export default class TrackController {
+  titleSchema = z.string().trim().min(1).max(255);
+
   constructor(private readonly trackRepository: TrackRepository) {}
 
   get = async (req: Request, res: Response) => {
@@ -21,6 +24,14 @@ export default class TrackController {
   };
 
   create = async (req: Request, res: Response) => {
+    const newTrack: NewTrack = req.body;
+    const validationResult = this.titleSchema.safeParse(newTrack?.title);
+    if (!validationResult.success) {
+      throw new Error(EStatusCode.BAD_REQUEST, {
+        logLevel: 'warn',
+        message: `Invalid title ${validationResult.error.message}`,
+      });
+    }
     const track = await this.trackRepository.create(req.body as NewTrack);
     const apiResponse = new ApiResponse<ITrack>({data: track});
     res.status(EStatusCode.CREATED).send(apiResponse);
@@ -30,7 +41,7 @@ export default class TrackController {
     const tracks = await this.trackRepository.getAllWithFilters(req.query);
     const apiResponse = new ApiResponse<ITrack[]>({data: tracks});
     res.status(EStatusCode.OK).send(apiResponse);
-  }
+  };
 
   updateById = async (req: Request, res: Response) => {
     const trackId = Number(req.params.id);
@@ -38,11 +49,14 @@ export default class TrackController {
     if (!trackId) {
       throw new Error(EStatusCode.NOT_FOUND);
     }
-    const track = await this.trackRepository.updateById(trackId, req.body as TrackUpdate);
+    const track = await this.trackRepository.updateById(
+      trackId,
+      req.body as TrackUpdate
+    );
     const apiResponse = new ApiResponse<TrackUpdate>({data: track});
     res.status(EStatusCode.OK).send(apiResponse);
   };
-  
+
   deleteById = async (req: Request, res: Response) => {
     const trackId = Number(req.params.id);
     if (!trackId) {
@@ -50,5 +64,5 @@ export default class TrackController {
     }
     await this.trackRepository.deleteById(trackId);
     res.status(EStatusCode.OK).send();
-  }
+  };
 }

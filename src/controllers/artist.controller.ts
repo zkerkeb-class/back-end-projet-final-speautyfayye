@@ -1,19 +1,22 @@
 import {Request, Response} from 'express';
-import {IArtist, IArtistExt} from '../models/artist';
+import z from 'zod';
+import {IArtist, IArtistExt, NewArtist} from '../models/artist';
 import {EStatusCode} from '../models/enums/statusCode';
 import {Error} from '../models/error';
 import {ApiResponse} from '../models/other/apiResponse';
 import ArtistRepository from '../repositories/artist.repository';
 
 export default class ArtistController {
+  nameSchema = z.string().trim().min(1).max(255);
+
   constructor(private readonly artistRepository: ArtistRepository) {}
 
   getAll = async (req: Request, res: Response) => {
-    const { category_id, sortOrder } = req.query;
-    
+    const {category_id, sortOrder} = req.query;
+
     const options = {
       category_id: category_id ? Number(category_id) : undefined,
-      sortOrder: sortOrder as 'asc' | 'desc' | undefined
+      sortOrder: sortOrder as 'asc' | 'desc' | undefined,
     };
 
     const artists = await this.artistRepository.getAllArtists(options);
@@ -51,7 +54,14 @@ export default class ArtistController {
   };
 
   create = async (req: Request, res: Response) => {
-    const artist = req.body;
+    const artist: NewArtist = req.body;
+    const validationResult = this.nameSchema.safeParse(artist?.name);
+    if (!validationResult.success) {
+      throw new Error(EStatusCode.BAD_REQUEST, {
+        logLevel: 'warn',
+        message: `Invalid title ${validationResult.error.message}`,
+      });
+    }
     const createdArtist = await this.artistRepository.createArtist(artist);
 
     const apiResponse = new ApiResponse<IArtist>({data: createdArtist});

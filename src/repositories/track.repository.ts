@@ -1,15 +1,15 @@
 import {jsonObjectFrom} from 'kysely/helpers/postgres';
 import {db} from '../config/db/db';
-import {ITrack, ITrackExt, NewTrack, TrackUpdate} from '../models/track';
 import {EEntityType} from '../models/enums/entityType';
 import {EFileType} from '../models/enums/fileType';
+import {ITrack, ITrackExt, NewTrack, TrackUpdate} from '../models/track';
 
 export default class TrackRepository {
   create = async (track: NewTrack): Promise<ITrack> => {
     const newTrack = await db.transaction().execute(async trx => {
       const t = await db
         .insertInto('track')
-        .values(track)
+        .values({...track, number_of_plays: 0, trackNumber: 0})
         .returningAll()
         .executeTakeFirstOrThrow();
 
@@ -119,11 +119,19 @@ export default class TrackRepository {
     }
 
     if (options?.minNumberOfPlays) {
-      query = query.where('track.number_of_plays', '>=', options.minNumberOfPlays);
+      query = query.where(
+        'track.number_of_plays',
+        '>=',
+        options.minNumberOfPlays
+      );
     }
 
     if (options?.maxNumberOfPlays) {
-      query = query.where('track.number_of_plays', '<=', options.maxNumberOfPlays);
+      query = query.where(
+        'track.number_of_plays',
+        '<=',
+        options.maxNumberOfPlays
+      );
     }
 
     if (options?.sortBy === 'duration') {

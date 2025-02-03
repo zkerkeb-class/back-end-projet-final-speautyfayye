@@ -6,6 +6,8 @@ export default class ErrorController {
   constructor(private readonly logRepository: LogRepository) {}
 
   errorHandler = async (error: unknown, req: any, res: any, next: any) => {
+    console.error('🚀 ~ ErrorController ~ errorHandler= ~ error:', error);
+
     if ('level' in (error as any)) {
       const err = error as any & {level: string};
       if (err.level === 'info') {
