@@ -22,12 +22,12 @@ export default class AudioService {
       type: EFileType.AUDIO,
     };
 
-    // this.convertService.convertAudio({ buffer: audio.buffer });
+    const wav = await this.convertService.convertToWav(audio.buffer);
     this.uploadRepository.upload(
       {
         ...directory,
-        readable: Readable.from(audio.buffer),
-        extension: EAudioExtension.MP3,
+        readable: wav,
+        extension: EAudioExtension.WAV,
       },
       this.uploadRepository.getDirPath(directory)
     );
@@ -50,7 +50,7 @@ export default class AudioService {
     const readable = this.uploadRepository.read(
       {
         ...directory,
-        extension: EAudioExtension.MP3,
+        extension: EAudioExtension.WAV,
       },
       this.uploadRepository.getDirPath(directory)
     );

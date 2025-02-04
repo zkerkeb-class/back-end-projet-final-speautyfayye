@@ -1,8 +1,7 @@
+import ffmpeg from 'fluent-ffmpeg';
+import {PassThrough, Readable} from 'node:stream';
 import sharp, {FormatEnum} from 'sharp';
 import {EImageExtension} from '../models/enums/extension';
-import {PassThrough, Readable} from 'node:stream';
-import ffmpeg from 'fluent-ffmpeg';
-import fs from 'node:fs';
 
 interface IConvertImageInput {
   buffer: Buffer;
