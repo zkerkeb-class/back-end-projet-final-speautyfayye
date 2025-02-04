@@ -1,7 +1,7 @@
 FROM node:20-alpine
 
-RUN apt-get -y update
-RUN apt-get install -y ffmpeg
+RUN apk -y update
+RUN apk install -y ffmpeg
 
 WORKDIR /app
 COPY . .

@@ -99,10 +99,13 @@ io.on('connection', socket => {
     io.to(groupId).emit('track', {currentTrack, nextTracksList, groupId});
   });
 
-  socket.on('join', groupId => {
-    console.log('🚀 ~ joining:', groupId);
+  socket.on('join', ({groupId, socketId}) => {
+    io.to(groupId).emit('sync', socketId);
+    console.log('🚀 ~ joining:', groupId, socketId);
     socket.join(groupId);
   });
+
+  socket.on('sync', ({currentTrack, nextTracksList, groupId, socketId}) => {});
 });
 
 if (!isTest) {
