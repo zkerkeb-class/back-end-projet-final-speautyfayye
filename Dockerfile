@@ -1,7 +1,8 @@
 FROM node:20-alpine
 
-RUN apk -y update
-RUN apk install -y ffmpeg
+RUN apk update
+RUN apk upgrade
+RUN apk add --no-cache ffmpeg
 
 WORKDIR /app
 COPY . .
