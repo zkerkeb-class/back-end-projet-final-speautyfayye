@@ -1,7 +1,7 @@
 import compression from 'compression';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
-import express, {Express} from 'express';
+import express from 'express';
 import helmet from 'helmet';
 import RateLimiter from './config/rateLimit';
 
@@ -59,18 +59,51 @@ import UserRouter from './routers/user.router';
 import swaggerOutput from './swagger_output.json';
 import AuthValidators from './validators/auth.validators';
 
+import {createServer} from 'http';
+import {Server} from 'socket.io';
+
 const limiter = new RateLimiter();
 const corsMiddleware = new CorsMiddleware();
 const measureRequestTime = new MeasureRequestTime();
 
-const app: Express = express();
+const app = express();
+const httpServer = createServer(app);
 app.use(helmet());
 app.use(cors(corsMiddleware.options));
 app.use(compression());
 app.use(express.json({limit: '10kb'}));
 app.use(cookieParser());
 app.use(measureRequestTime.get);
-app.use(limiter.global);
+// app.use(limiter.global);
+
+const io = new Server(httpServer, {
+  cors: {
+    origin: 'http://localhost:3000',
+  },
+});
+io.on('connection', socket => {
+  socket.on('connect', socket => {
+    console.log('Client connected', socket);
+  });
+  socket.on('disconnect', () => {
+    console.log('Client disconnected');
+  });
+
+  socket.on('action', action => {
+    console.log('🚀 ~ action:', action);
+    io.to(action.groupId).emit('action', action);
+  });
+
+  socket.on('track', ({currentTrack, nextTracksList, groupId}) => {
+    console.log('🚀 ~ listen track:');
+    io.to(groupId).emit('track', {currentTrack, nextTracksList, groupId});
+  });
+
+  socket.on('join', groupId => {
+    console.log('🚀 ~ joining:', groupId);
+    socket.join(groupId);
+  });
+});
 
 if (!isTest) {
   migrateToLatest();
@@ -181,4 +214,4 @@ app.use('/metrics', metricsRouter.router);
 app.use(errorController.errorHandler);
 //#endregion
 
-export default app;
+export default httpServer;

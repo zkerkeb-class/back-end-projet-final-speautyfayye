@@ -36,6 +36,7 @@
     "node-cache": "^5.1.2",
     "pg": "^8.13.1",
     "sharp": "^0.33.5",
+    "socket.io": "^4.8.1",
     "supertest": "^7.0.0",
     "swagger-autogen": "^2.23.7",
     "swagger-ui-express": "^5.0.1",
