@@ -21,5 +21,7 @@ export default class AlbumRouter {
     this.router
       .route('/')
       .get(this.cacheMiddleware.get, this.albumController.getAllWithFilters);
+
+    this.router.route('/:id/organize').put(this.albumController.organize);
   }
 }

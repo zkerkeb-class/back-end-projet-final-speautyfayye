@@ -70,7 +70,7 @@ app.use(compression());
 app.use(express.json({limit: '10kb'}));
 app.use(cookieParser());
 app.use(measureRequestTime.get);
-// app.use(limiter.global);
+app.use(limiter.global);
 
 if (!isTest) {
   migrateToLatest();
@@ -140,7 +140,7 @@ const playlistController = new PlaylistController(
   logRepository
 );
 const trackController = new TrackController(trackRepository);
-const albumController = new AlbumController(albumRepository);
+const albumController = new AlbumController(albumRepository, trackRepository);
 const categoryController = new CategoryController(categoryRepository);
 const artistController = new ArtistController(artistRepository);
 const searchController = new SearchController(searchRepository);

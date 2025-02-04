@@ -4,9 +4,13 @@ import {EStatusCode} from '../models/enums/statusCode';
 import {Error} from '../models/error';
 import {ApiResponse} from '../models/other/apiResponse';
 import AlbumRepository from '../repositories/album.repository';
+import TrackRepository from '../repositories/track.repository';
 
 export default class AlbumController {
-  constructor(private readonly albumRepository: AlbumRepository) {}
+  constructor(
+    private readonly albumRepository: AlbumRepository,
+    private readonly trackRepository: TrackRepository
+  ) {}
 
   getById = async (req: Request, res: Response) => {
     const id = Number(req.params.id);
@@ -35,8 +39,8 @@ export default class AlbumController {
       artistId: artistId ? Number(artistId) : undefined,
       category: category ? Number(category) : undefined,
       releaseDate: releaseDate ? releaseDateParsed : undefined,
-      sortBy: sortBy ? sortBy as 'releaseDate' | 'trackCount' : undefined,
-      sortOrder: sortOrder ? sortOrder as 'asc' | 'desc' : undefined,
+      sortBy: sortBy ? (sortBy as 'releaseDate' | 'trackCount') : undefined,
+      sortOrder: sortOrder ? (sortOrder as 'asc' | 'desc') : undefined,
     };
 
     // Validation des filtres numériques
@@ -81,5 +85,23 @@ export default class AlbumController {
     );
     const apiResponse = new ApiResponse<IAlbum>({data: album});
     res.status(EStatusCode.OK).send(apiResponse);
+  };
+
+  organize = async (req: Request, res: Response) => {
+    const albumId = Number(req.params.id);
+    if (!albumId) {
+      throw new Error(EStatusCode.BAD_REQUEST);
+    }
+    const organizedTracks: [] = req.body.organizedTracks;
+    if (!organizedTracks || organizedTracks.length === 0) {
+      throw new Error(EStatusCode.BAD_REQUEST);
+    }
+
+    for (let i = 0; i < organizedTracks.length; i++) {
+      const track = organizedTracks[i];
+      await this.trackRepository.updateById(track[0], {trackNumber: track[1]});
+    }
+
+    res.status(EStatusCode.OK).send();
   };
 }
