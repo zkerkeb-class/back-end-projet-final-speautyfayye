@@ -29,7 +29,7 @@ export default class ArtistRepository {
           eb
             .selectFrom('track')
             .selectAll('track')
-            .innerJoin('playlist_track', 'track.id', 'playlist_track.track_id')
+            .innerJoin('artist_album', 'track.id', 'artist_album.album_id')
             .select(eb => [
               jsonObjectFrom(
                 eb
@@ -55,7 +55,7 @@ export default class ArtistRepository {
                   .whereRef('artist_album.album_id', '=', 'track.album_id')
               ).as('artist'),
             ])
-            .where('playlist_track.playlist_id', '=', id)
+            .whereRef('artist_album.artist_id', '=', 'artist.id')
         ).as('tracks'),
         jsonArrayFrom(
           eb
@@ -72,7 +72,7 @@ export default class ArtistRepository {
             .whereRef('category.id', '=', 'artist.category_id')
         ).as('category'),
       ])
-      .where('id', '=', id)
+      .where('artist.id', '=', id)
       .executeTakeFirst();
   }
 
