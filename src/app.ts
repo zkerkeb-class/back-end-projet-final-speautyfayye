@@ -78,7 +78,9 @@ app.use(measureRequestTime.get);
 
 const io = new Server(httpServer, {
   cors: {
-    origin: process.env.FRONT_URL,
+    origin: '*',
+    methods: ['PUT', 'GET', 'POST', 'DELETE', 'OPTIONS'],
+    credentials: false,
   },
 });
 io.on('connection', socket => {
