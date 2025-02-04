@@ -78,7 +78,7 @@ app.use(measureRequestTime.get);
 
 const io = new Server(httpServer, {
   cors: {
-    origin: 'http://localhost:3000',
+    origin: process.env.FRONT_URL,
   },
 });
 io.on('connection', socket => {
