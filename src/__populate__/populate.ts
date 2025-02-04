@@ -1,8 +1,10 @@
 import {faker} from '@faker-js/faker';
+import ffmpeg from 'fluent-ffmpeg';
 import {Kysely, PostgresDialect} from 'kysely';
 import {randomInt, randomUUID} from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
+import {PassThrough, Readable} from 'node:stream';
 import {Pool} from 'pg';
 import {DB_HOST, DB_NAME, DB_PORT, DB_PWD, DB_USER} from '../config/env';
 import {AlbumTable} from '../models/album';
@@ -16,6 +18,7 @@ import {PlaylistTable} from '../models/playlist';
 import {PlaylistTrackTable} from '../models/playlist_track';
 import {TrackTable} from '../models/track';
 import {UserTable} from '../models/user';
+
 const m = import('music-metadata');
 
 interface Database {
@@ -143,9 +146,10 @@ const populate = async () => {
       );
 
       const buffer = await fs.promises.readFile(directory + file);
+      const wav = await stream2buffer(await convertToWav(buffer));
       fs.writeFileSync(
-        path.join(directory, '../../../ressources/audios/', audioId + '.mp3'),
-        buffer
+        path.join(directory, '../../../ressources/audios/', audioId + '.wav'),
+        wav
       );
       fs.unlinkSync(path.join(directory, file));
 
@@ -343,3 +347,34 @@ const createRandomUsers = async (
     }
   }
 };
+
+const convertToWav = async (audioBuffer: Buffer): Promise<Readable> => {
+  return new Promise<Readable>((resolve, reject) => {
+    const bufferStream = new Readable();
+    bufferStream.push(audioBuffer);
+    bufferStream.push(null);
+
+    const wavStream = new PassThrough();
+
+    ffmpeg(bufferStream)
+      .inputFormat('mp3')
+      .toFormat('wav')
+      .on('error', err => {
+        reject(err);
+      })
+      .on('end', () => {})
+      .pipe(wavStream);
+
+    resolve(wavStream);
+  });
+};
+
+function stream2buffer(stream: Readable): Promise<Buffer> {
+  return new Promise((resolve, reject) => {
+    const _buf: any = [];
+
+    stream.on('data', chunk => _buf.push(chunk));
+    stream.on('end', () => resolve(Buffer.concat(_buf)));
+    stream.on('error', err => reject(err));
+  });
+}

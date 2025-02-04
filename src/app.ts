@@ -30,7 +30,6 @@ import AuthService from './services/auth.service';
 
 import swaggerUi from 'swagger-ui-express';
 import {migrateToLatest} from './config/db/db';
-import {isTest} from './config/env';
 import AlbumController from './controllers/album.controller';
 import ArtistController from './controllers/artist.controller';
 import CategoryController from './controllers/category.controller';
@@ -97,22 +96,41 @@ io.on('connection', socket => {
   });
 
   socket.on('track', ({currentTrack, nextTracksList, groupId}) => {
-    console.log('🚀 ~ listen track:');
+    console.log('🚀 ~ listen track:', groupId, currentTrack.title);
     io.to(groupId).emit('track', {currentTrack, nextTracksList, groupId});
   });
 
   socket.on('join', ({groupId, socketId}) => {
-    io.to(groupId).emit('sync', socketId);
+    io.to(groupId).emit('sync', {groupId, socketId});
     console.log('🚀 ~ joining:', groupId, socketId);
     socket.join(groupId);
   });
 
-  socket.on('sync', ({currentTrack, nextTracksList, groupId, socketId}) => {});
+  socket.on(
+    'sync',
+    ({
+      currentTrack,
+      nextTracksList,
+      groupId,
+      currentTime,
+      socketId,
+      playing,
+    }) => {
+      io.to(groupId).emit('syncClient', {
+        currentTrack,
+        nextTracksList,
+        groupId,
+        currentTime,
+        socketId,
+        playing,
+      });
+    }
+  );
 });
 
-if (!isTest) {
-  migrateToLatest();
-}
+// if (!isTest) {
+migrateToLatest();
+// }
 
 //#region Repositories
 const logRepository = new LogRepository();
