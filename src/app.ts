@@ -136,8 +136,8 @@ io.on('connection', socket => {
     }
   );
   
-  socket.join('track_history');
-  socket.on('track_history', async ({ 
+  socket.join('trackHistory');
+  socket.on('trackHistory', async ({ 
     trackId, 
     trackTitle, 
     trackDuration, 
@@ -145,8 +145,7 @@ io.on('connection', socket => {
     trackArtistName,
     trackAudio}) => {
     try {
-      console.log('🚀 ~ track_history:', trackId, trackTitle, trackDuration, trackAlbumTitle, trackArtistName, trackAudio);
-      const cacheKey = `track_history`;
+      const cacheKey = `trackHistory`;
       let trackHistory = await cache.get(cacheKey) as TrackDetails[] || [];
       const index = trackHistory.findIndex((track) => track.id === trackId);
       if(index !== -1) {
@@ -162,13 +161,12 @@ io.on('connection', socket => {
       });
       trackHistory = trackHistory.slice(0, 20);
       cache.set(cacheKey, trackHistory, 3600);
-      io.to('track_history').emit('track_history', {
+      io.to('trackHistory').emit('trackHistory', {
         trackHistory: trackHistory
       });
 
     } catch (error) {
-      console.error('Error fetching track details:', error);
-      io.to('track_history').emit('error', {message: 'Error fetching track details'});
+      io.to('trackHistory').emit('error', {message: 'Error fetching track details'});
     }
   });
 });
