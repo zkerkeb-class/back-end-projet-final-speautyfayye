@@ -137,49 +137,38 @@ io.on('connection', socket => {
   );
   
   socket.join('track_history');
-  socket.on('track_history', async ({ trackId }) => {
+  socket.on('track_history', async ({ 
+    trackId, 
+    trackTitle, 
+    trackDuration, 
+    trackAlbumTitle,
+    trackArtistName,
+    trackAudio}) => {
     try {
-      console.log('🚀 ~ track_history:', trackId);
-      const cacheKey = `track_details_${trackId}`;
-      let trackDetails = cache.get(cacheKey) as TrackDetails | undefined;
-
-      if (!trackDetails) {
-        trackDetails = await db
-          .selectFrom('track')
-          .innerJoin('album', 'album.id', 'track.album_id')
-          .leftJoin('artist_album', 'artist_album.album_id', 'album.id')
-          .leftJoin('artist', 'artist.id', 'artist_album.artist_id')
-          .select([
-            'track.id',
-            'track.title',
-            'track.duration',
-            'track.audio',
-            'album.title as album_title',
-            'artist.name as artist_name',
-          ])
-          .where('track.id', '=', trackId)
-          .executeTakeFirst();
-
-        if (trackDetails) {
-          cache.set(cacheKey, trackDetails, 3600);
-        }
+      console.log('🚀 ~ track_history:', trackId, trackTitle, trackDuration, trackAlbumTitle, trackArtistName, trackAudio);
+      const cacheKey = `track_history`;
+      let trackHistory = await cache.get(cacheKey) as TrackDetails[] || [];
+      const index = trackHistory.findIndex((track) => track.id === trackId);
+      if(index !== -1) {
+        trackHistory.splice(index, 1);
       }
-
-      let history = (cache.get(`track_history`) || []) as TrackDetails[];
-      if (trackDetails) {
-        history
-          .push(trackDetails)
-        history = history.slice(0, 20);
-
-        cache.set(`track_history`, history, 3600);
-      }
+      trackHistory.unshift({
+        id: trackId,
+        title: trackTitle,
+        artist_name: trackArtistName,
+        duration: trackDuration,
+        album_title: trackAlbumTitle,
+        audio: trackAudio
+      });
+      trackHistory = trackHistory.slice(0, 20);
+      cache.set(cacheKey, trackHistory, 3600);
       io.to('track_history').emit('track_history', {
-        track_history: history
+        trackHistory: trackHistory
       });
 
     } catch (error) {
       console.error('Error fetching track details:', error);
-      socket.emit('error', {message: 'Error fetching track details'});
+      io.to('track_history').emit('error', {message: 'Error fetching track details'});
     }
   });
 });
