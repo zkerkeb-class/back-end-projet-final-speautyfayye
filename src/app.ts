@@ -145,6 +145,7 @@ io.on('connection', socket => {
     trackArtistName,
     trackAudio}) => {
     try {
+      
       const cacheKey = `trackHistory`;
       let trackHistory = await cache.get(cacheKey) as TrackDetails[] || [];
       const index = trackHistory.findIndex((track) => track.id === trackId);
@@ -164,6 +165,13 @@ io.on('connection', socket => {
       io.to('trackHistory').emit('trackHistory', {
         trackHistory: trackHistory
       });
+
+      const track = await trackRepository.getById(trackId);
+      if(track) {
+        const updatedTrack = await trackRepository.updateById(trackId, {
+          number_of_plays: Number(track.number_of_plays) + 1
+        });
+      }
 
     } catch (error) {
       io.to('trackHistory').emit('error', {message: 'Error fetching track details'});
