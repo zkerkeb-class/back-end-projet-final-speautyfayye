@@ -4,7 +4,7 @@ import cors from 'cors';
 import express from 'express';
 import helmet from 'helmet';
 import RateLimiter from './config/rateLimit';
-
+import { cache } from './middleware/cache.middleware';
 import UploadRepository from './repositories/upload.repository';
 
 // import MeasureRequestTime from './middleware/request-timer.middleware';
@@ -61,6 +61,7 @@ import AuthValidators from './validators/auth.validators';
 import {createServer} from 'http';
 import {Server} from 'socket.io';
 
+import { db } from './config/db/db';
 const limiter = new RateLimiter();
 const corsMiddleware = new CorsMiddleware();
 const measureRequestTime = new MeasureRequestTime();
@@ -75,6 +76,14 @@ app.use(cookieParser());
 app.use(measureRequestTime.get);
 // app.use(limiter.global);
 
+interface TrackDetails {
+  id: number;
+  title: string;
+  artist_name: string | null;
+  duration: number | undefined;
+  album_title: string;
+  audio: string;
+}
 const io = new Server(httpServer, {
   cors: {
     origin: '*',
@@ -105,7 +114,7 @@ io.on('connection', socket => {
     console.log('🚀 ~ joining:', groupId, socketId);
     socket.join(groupId);
   });
-
+  
   socket.on(
     'sync',
     ({
@@ -126,6 +135,53 @@ io.on('connection', socket => {
       });
     }
   );
+  
+  socket.join('track_history');
+  socket.on('track_history', async ({ trackId }) => {
+    try {
+      console.log('🚀 ~ track_history:', trackId);
+      const cacheKey = `track_details_${trackId}`;
+      let trackDetails = cache.get(cacheKey) as TrackDetails | undefined;
+
+      if (!trackDetails) {
+        trackDetails = await db
+          .selectFrom('track')
+          .innerJoin('album', 'album.id', 'track.album_id')
+          .leftJoin('artist_album', 'artist_album.album_id', 'album.id')
+          .leftJoin('artist', 'artist.id', 'artist_album.artist_id')
+          .select([
+            'track.id',
+            'track.title',
+            'track.duration',
+            'track.audio',
+            'album.title as album_title',
+            'artist.name as artist_name',
+          ])
+          .where('track.id', '=', trackId)
+          .executeTakeFirst();
+
+        if (trackDetails) {
+          cache.set(cacheKey, trackDetails, 3600);
+        }
+      }
+
+      let history = (cache.get(`track_history`) || []) as TrackDetails[];
+      if (trackDetails) {
+        history
+          .push(trackDetails)
+        history = history.slice(0, 20);
+
+        cache.set(`track_history`, history, 3600);
+      }
+      io.to('track_history').emit('track_history', {
+        track_history: history
+      });
+
+    } catch (error) {
+      console.error('Error fetching track details:', error);
+      socket.emit('error', {message: 'Error fetching track details'});
+    }
+  });
 });
 
 // if (!isTest) {
