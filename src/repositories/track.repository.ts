@@ -9,7 +9,7 @@ export default class TrackRepository {
     const newTrack = await db.transaction().execute(async trx => {
       const t = await db
         .insertInto('track')
-        .values({...track, number_of_plays: 0, trackNumber: 0})
+        .values({...track, number_of_plays: 0})
         .returningAll()
         .executeTakeFirstOrThrow();
 
@@ -156,5 +156,14 @@ export default class TrackRepository {
       .where('id', '=', id)
       .returningAll()
       .executeTakeFirstOrThrow();
+  };
+
+  getMostPlayed = async (): Promise<ITrack[]> => {
+    return await db
+      .selectFrom('track')
+      .selectAll('track')
+      .orderBy('number_of_plays', 'desc')
+      .limit(10)
+      .execute();
   };
 }

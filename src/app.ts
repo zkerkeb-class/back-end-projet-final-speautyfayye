@@ -4,7 +4,7 @@ import cors from 'cors';
 import express from 'express';
 import helmet from 'helmet';
 import RateLimiter from './config/rateLimit';
-import { cache } from './middleware/cache.middleware';
+import {cache} from './middleware/cache.middleware';
 import UploadRepository from './repositories/upload.repository';
 
 // import MeasureRequestTime from './middleware/request-timer.middleware';
@@ -61,7 +61,6 @@ import AuthValidators from './validators/auth.validators';
 import {createServer} from 'http';
 import {Server} from 'socket.io';
 
-import { db } from './config/db/db';
 const limiter = new RateLimiter();
 const corsMiddleware = new CorsMiddleware();
 const measureRequestTime = new MeasureRequestTime();
@@ -91,7 +90,7 @@ const io = new Server(httpServer, {
     credentials: false,
   },
 });
-io.on('connection', socket => {
+io.on('connection', async socket => {
   socket.on('connect', socket => {
     console.log('Client connected', socket);
   });
@@ -114,7 +113,7 @@ io.on('connection', socket => {
     console.log('🚀 ~ joining:', groupId, socketId);
     socket.join(groupId);
   });
-  
+
   socket.on(
     'sync',
     ({
@@ -135,48 +134,54 @@ io.on('connection', socket => {
       });
     }
   );
-  
-  socket.join('trackHistory');
-  socket.on('trackHistory', async ({ 
-    trackId, 
-    trackTitle, 
-    trackDuration, 
-    trackAlbumTitle,
-    trackArtistName,
-    trackAudio}) => {
-    try {
-      
-      const cacheKey = `trackHistory`;
-      let trackHistory = await cache.get(cacheKey) as TrackDetails[] || [];
-      const index = trackHistory.findIndex((track) => track.id === trackId);
-      if(index !== -1) {
-        trackHistory.splice(index, 1);
-      }
-      trackHistory.unshift({
-        id: trackId,
-        title: trackTitle,
-        artist_name: trackArtistName,
-        duration: trackDuration,
-        album_title: trackAlbumTitle,
-        audio: trackAudio
-      });
-      trackHistory = trackHistory.slice(0, 20);
-      cache.set(cacheKey, trackHistory, 3600);
-      io.to('trackHistory').emit('trackHistory', {
-        trackHistory: trackHistory
-      });
 
-      const track = await trackRepository.getById(trackId);
-      if(track) {
-        const updatedTrack = await trackRepository.updateById(trackId, {
-          number_of_plays: Number(track.number_of_plays) + 1
+  socket.join('trackHistory');
+
+  socket.on(
+    'trackHistory',
+    async ({
+      trackId,
+      trackTitle,
+      trackDuration,
+      trackAlbumTitle,
+      trackArtistName,
+      trackAudio,
+    }) => {
+      try {
+        const cacheKey = `trackHistory`;
+        let trackHistory =
+          ((await cache.get(cacheKey)) as TrackDetails[]) || [];
+        const index = trackHistory.findIndex(track => track.id === trackId);
+        if (index !== -1) {
+          trackHistory.splice(index, 1);
+        }
+        trackHistory.unshift({
+          id: trackId,
+          title: trackTitle,
+          artist_name: trackArtistName,
+          duration: trackDuration,
+          album_title: trackAlbumTitle,
+          audio: trackAudio,
+        });
+        trackHistory = trackHistory.slice(0, 20);
+        cache.set(cacheKey, trackHistory, 3600);
+        io.to('trackHistory').emit('trackHistory', {
+          trackHistory: trackHistory,
+        });
+
+        const track = await trackRepository.getById(trackId);
+        if (track) {
+          await trackRepository.updateById(trackId, {
+            number_of_plays: Number(track.number_of_plays) + 1,
+          });
+        }
+      } catch (error) {
+        io.to('trackHistory').emit('error', {
+          message: 'Error fetching track details',
         });
       }
-
-    } catch (error) {
-      io.to('trackHistory').emit('error', {message: 'Error fetching track details'});
     }
-  });
+  );
 });
 
 // if (!isTest) {

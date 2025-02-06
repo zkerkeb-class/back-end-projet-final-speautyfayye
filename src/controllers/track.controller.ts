@@ -7,7 +7,7 @@ import {ITrack, NewTrack, TrackExt, TrackUpdate} from '../models/track';
 import TrackRepository from '../repositories/track.repository';
 
 export default class TrackController {
-  titleSchema = z.string().trim().min(1).max(255);
+  private titleSchema = z.string().trim().min(1).max(255);
 
   constructor(private readonly trackRepository: TrackRepository) {}
 
@@ -64,5 +64,13 @@ export default class TrackController {
     }
     await this.trackRepository.deleteById(trackId);
     res.status(EStatusCode.OK).send();
+  };
+
+  getMostPlayed = async (req: Request, res: Response) => {
+    console.log('aAAAAAAAAAAAA');
+
+    const tracks = await this.trackRepository.getMostPlayed();
+    const apiResponse = new ApiResponse<ITrack[]>({data: tracks});
+    res.status(EStatusCode.OK).send(apiResponse);
   };
 }

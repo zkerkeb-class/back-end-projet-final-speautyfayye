@@ -24,6 +24,7 @@ export default class TrackRouter {
   private createRoutes() {
     this.router.route('/:id').delete(this.trackController.deleteById);
     this.router.route('/:id').put(this.trackController.updateById);
+    this.router.route('/most-played').get(this.trackController.getMostPlayed);
     this.router.route('/:id').get(this.trackController.get);
 
     this.router.route('/').post(this.trackController.create);
